@@ -1,0 +1,270 @@
+{
+  "app": {
+    "title": "Quiz Game Admin Panel",
+    "game": "The Game",
+    "adminPanel": "Admin Panel"
+  },
+  "login": {
+    "title" : "Game",
+    "subtitle": "Admin Panal",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "errors": {
+      "requiredEmail": "Email is required",
+      "correctEmail": "Email must be correct",
+      "requirePassword": "Password is required",
+      "correctPassword": "Password must be 8 charcter at least"
+    }
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "logout": "Logout",
+    "users": "Users",
+    "payments": "Payments",
+    "prices": "Prices",
+    "countries": "Countries"
+  },
+  "categories": {
+    "title": "Categories",
+    "subtitle": "Manage question categories and organize content",
+    "addCategory": "Add Category",
+    "searchPlaceholder": "Search categories...",
+    "itemsPerPage": "Items per page",
+    "total": "Total",
+    "noDescription": "No description available",
+    "viewQuestions": "View Questions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading categories...",
+    "emptyTitle": "No Categories Found",
+    "emptySubtitle": "Create your first category to get started",
+    "createCategory": "Create Category",
+    "dialog": {
+      "createTitle": "Create New Category",
+      "editTitle": "Edit Category",
+      "name": "Category Name",
+      "description": "Description",
+      "media": "Media (Image/Video)",
+      "createButton": "Create Category",
+      "updateButton": "Update Category",
+      "cancel": "Cancel",
+      "deleteTitle": "Delete Category",
+      "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+      "deleteWarning": "This action cannot be undone and will also delete all questions in this category.",
+      "deleteButton": "Delete",
+      "country": "Country",
+      "fullImage": "full image display",
+      "yes": "yes",
+      "no": "no"
+    },
+    "validation": {
+      "nameRequired": "Category name is required",
+      "nameMinLength": "Name must be at least 2 characters"
+    }
+  },
+  "questions": {
+    "title": "Questions",
+    "subtitle": "Manage questions for {categoryName}",
+    "addQuestion": "Add Question",
+    "searchPlaceholder": "Search questions...",
+    "itemsPerPage": "Items per page",
+    "total": "Total",
+    "loading": "Loading questions...",
+    "emptyTitle": "No Questions Found",
+    "emptySubtitle": "Create your first question to get started",
+    "createQuestion": "Create Question",
+    "categoryQuestions": "Category Questions",
+    "manageQuestions": "Manage questions for this category",
+    "filterByDifficulty": "Filter by Difficulty",
+    "itemsPerPageLabel": "Items per page",
+    "totalQuestions": "Total Questions",
+    "answer": "Answer",
+    "questionMedia": "Question Media:",
+    "answerMedia": "Answer Media:",
+    "viewFile": "View File",
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loadingQuestions": "Loading questions...",
+    "noQuestionsFound": "No Questions Found",
+    "addFirstQuestion": "Add your first question to this category",
+    "addQuestionButton": "Add Question",
+    "editQuestion": "Edit Question",
+    "addNewQuestion": "Add New Question",
+    "mediaFiles": "Media Files",
+    "dialog": {
+      "createTitle": "Create New Question",
+      "editTitle": "Edit Question",
+      "questionText": "Question Text",
+      "answerText": "Answer Text",
+      "difficulty": "Difficulty",
+      "questionMedia": "Question Media (Image/Video)",
+      "answerMedia": "Answer Media (Image/Video)",
+      "createButton": "Create Question",
+      "updateButton": "Update Question",
+      "cancel": "Cancel",
+      "deleteTitle": "Delete Question",
+      "deleteConfirm": "Are you sure you want to delete this question?",
+      "deleteWarning": "This action cannot be undone.",
+      "deleteButton": "Delete"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "validation": {
+      "questionRequired": "Question text is required",
+      "answerRequired": "Answer text is required",
+      "difficultyRequired": "Difficulty is required"
+    }
+  },
+  "countries": {
+    "title": "Countries",
+    "subtitle": "Manage countries and their flags",
+    "addCountry": "Add Country",
+    "searchPlaceholder": "Search countries...",
+    "itemsPerPage": "Items per page",
+    "total": "Total",
+    "loading": "Loading countries...",
+    "emptyTitle": "No Countries Found",
+    "emptySubtitle": "Create your first country to get started",
+    "createCountry": "Create Country",
+    "dialog": {
+      "createTitle": "Create New Country",
+      "editTitle": "Edit Country",
+      "name": "Country Name",
+      "media": "Flag Image",
+      "createButton": "Create Country",
+      "updateButton": "Update Country",
+      "cancel": "Cancel",
+      "deleteTitle": "Delete Country",
+      "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+      "deleteWarning": "This action cannot be undone.",
+      "deleteButton": "Delete"
+    },
+    "validation": {
+      "nameRequired": "Country name is required",
+      "nameMinLength": "Name must be at least 2 characters"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome to the Quiz Game Admin Panel",
+    "stats": {
+      "totalCategories": "Total Categories",
+      "totalQuestions": "Total Questions",
+      "recentActivity": "Recent Activity"
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "loginButton": "Sign In",
+    "registerButton": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailValid": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsMatch": "Passwords must match",
+      "nameRequired": "Name is required"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "actions": "Actions",
+    "id": "ID",
+    "category": "Category",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "noData": "No data available",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "switchLanguage": "Switch Language"
+  },
+    "users": {
+    "title": "Users",
+    "subtitle": "This is page to manage users",
+    "table": {
+      "headers": {
+        "name": "Name",
+        "id": "ID",
+        "availableGames": "Available Games",
+        "role": "Role",
+        "createdAt": "Created At"
+      }
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "This is page to manage payments",
+    "table": {
+      "headers": {
+        "username": "username",
+        "id": "ID",
+        "amount": "Amount",
+        "status": "Status",
+        "gamesPurchased": "Games Purchased",
+        "paymobOrderId": "Paymob Order ID",
+        "createdAt": "Created At"
+      }
+    }
+  },
+  "prices": {
+    "title": "Prices",
+    "updatePrice": "Update Price",
+    "deletePrice": "Delete Price",
+    "confirmDeleteMessage": "Are you sure you want to delete this price?",
+    "subtitle": "This is page to manage prices",
+    "addPrice": "Add Price",
+    "table": {
+      "headers": {
+        "username": "username",
+        "id": "ID",
+        "price": "Price",
+        "discount": "Discount",
+        "gamesNumber": "Games Purchased",
+        "totalPrice": "Total Price",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      }
+    }
+  },
+  "form": {
+    "required": "This field is required",
+    "positiveNumber": "  Please enter a positive number",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  }
+}

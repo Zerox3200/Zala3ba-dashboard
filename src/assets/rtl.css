@@ -1,0 +1,81 @@
+/* RTL Support Styles */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .v-btn {
+  direction: rtl;
+}
+
+[dir="rtl"] .v-text-field .v-field__input {
+  text-align: right;
+}
+
+[dir="rtl"] .v-textarea .v-field__input {
+  text-align: right;
+}
+
+[dir="rtl"] .v-select .v-field__input {
+  text-align: right;
+}
+
+[dir="rtl"] .v-list-item {
+  text-align: right;
+}
+
+[dir="rtl"] .v-card-title {
+  text-align: right;
+}
+
+[dir="rtl"] .v-card-text {
+  text-align: right;
+}
+
+[dir="rtl"] .v-dialog .v-card-title {
+  text-align: right;
+}
+
+[dir="rtl"] .v-dialog .v-card-text {
+  text-align: right;
+}
+
+/* Fix spacing for RTL */
+[dir="rtl"] .mr-2 {
+  margin-right: 0 !important;
+  margin-left: 8px !important;
+}
+
+[dir="rtl"] .ml-2 {
+  margin-left: 0 !important;
+  margin-right: 8px !important;
+}
+
+[dir="rtl"] .mr-1 {
+  margin-right: 0 !important;
+  margin-left: 4px !important;
+}
+
+[dir="rtl"] .ml-1 {
+  margin-left: 0 !important;
+  margin-right: 4px !important;
+}
+
+/* Fix flex direction for RTL */
+[dir="rtl"] .d-flex {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .justify-space-between {
+  flex-direction: row-reverse;
+}
+
+/* Fix icon positioning */
+[dir="rtl"] .v-btn .v-icon:first-child {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+[dir="rtl"] .v-btn .v-icon:last-child {
+  margin-left: 0;
+  margin-right: 8px;
+}

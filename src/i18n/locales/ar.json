@@ -1,0 +1,271 @@
+{
+  "app": {
+    "title": "لوحة إدارة لعبة الأسئلة",
+    "game": "اللعبة",
+    "adminPanel": "لوحة الإدارة"
+  },
+  "login": {
+    "title" : "اللعبة",
+    "subtitle": "لوحة الإدارة",
+    "email": "البريد الإلكتروني",
+    "password":"كلمة المرور",
+    "login":"تسجيل الدخول",
+    "errors": {
+      "requiredEmail": "يجب إدخال البريد الإلكتروني",
+      "correctEmail": "البريد الإلكتروني يجب أن يكون صحيحاً",
+      "requirePassword": "كلمة المرور مطلوبة",
+      "correctPassword": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+      "loginFailed": "فشل في تسجيل الدخول"
+    }
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "categories": "الفئات",
+    "logout": "تسجيل الخروج",
+    "users": "المستخدمين",
+    "payments": "الدفع",
+    "prices": "الأسعار",
+    "countries": "الدول"
+  },
+  "categories": {
+    "title": "الفئات",
+    "subtitle": "أدر فئات الأسئلة ونظّم المحتوى",
+    "addCategory": "إضافة فئة",
+    "searchPlaceholder": "البحث في الفئات...",
+    "itemsPerPage": "العناصر في الصفحة",
+    "total": "المجموع",
+    "noDescription": "لا يوجد وصف متاح",
+    "viewQuestions": "عرض الأسئلة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "loading": "جاري تحميل الفئات...",
+    "emptyTitle": "لم يتم العثور على فئات",
+    "emptySubtitle": "أنشئ فئتك الأولى للبدء",
+    "createCategory": "إنشاء فئة",
+    "dialog": {
+      "createTitle": "إنشاء فئة جديدة",
+      "editTitle": "تعديل الفئة",
+      "name": "اسم الفئة",
+      "description": "الوصف",
+      "media": "الوسائط (صورة/فيديو)",
+      "createButton": "إنشاء الفئة",
+      "updateButton": "تحديث الفئة",
+      "cancel": "إلغاء",
+      "deleteTitle": "حذف الفئة",
+      "deleteConfirm": "هل أنت متأكد من حذف \"{name}\"؟",
+      "deleteWarning": "لا يمكن التراجع عن هذا الإجراء وسيتم حذف جميع الأسئلة في هذه الفئة أيضاً.",
+      "deleteButton": "حذف",
+      "country": "الدولة",
+      "fullImage": "إظهار الصورة كاملة",
+      "yes": "نعم",
+      "no": "لا"
+    },
+    "validation": {
+      "nameRequired": "اسم الفئة مطلوب",
+      "nameMinLength": "الاسم يجب أن يكون حرفين على الأقل"
+    }
+  },
+  "questions": {
+    "title": "الأسئلة",
+    "subtitle": "أدر الأسئلة لـ {categoryName}",
+    "addQuestion": "إضافة سؤال",
+    "searchPlaceholder": "البحث في الأسئلة...",
+    "itemsPerPage": "العناصر في الصفحة",
+    "total": "المجموع",
+    "loading": "جاري تحميل الأسئلة...",
+    "emptyTitle": "لم يتم العثور على أسئلة",
+    "emptySubtitle": "أنشئ سؤالك الأول للبدء",
+    "createQuestion": "إنشاء سؤال",
+    "categoryQuestions": "أسئلة الفئة",
+    "manageQuestions": "أدر الأسئلة لهذه الفئة",
+    "filterByDifficulty": "تصفية حسب الصعوبة",
+    "itemsPerPageLabel": "العناصر في الصفحة",
+    "totalQuestions": "إجمالي الأسئلة",
+    "answer": "الإجابة",
+    "questionMedia": "وسائط السؤال:",
+    "answerMedia": "وسائط الإجابة:",
+    "viewFile": "عرض الملف",
+    "viewDetails": "عرض التفاصيل",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "loadingQuestions": "جاري تحميل الأسئلة...",
+    "noQuestionsFound": "لم يتم العثور على أسئلة",
+    "addFirstQuestion": "أضف سؤالك الأول لهذه الفئة",
+    "addQuestionButton": "إضافة سؤال",
+    "editQuestion": "تعديل السؤال",
+    "addNewQuestion": "إضافة سؤال جديد",
+    "mediaFiles": "ملفات الوسائط",
+    "dialog": {
+      "createTitle": "إنشاء سؤال جديد",
+      "editTitle": "تعديل السؤال",
+      "questionText": "نص السؤال",
+      "answerText": "نص الإجابة",
+      "difficulty": "الصعوبة",
+      "questionMedia": "وسائط السؤال (صورة/فيديو)",
+      "answerMedia": "وسائط الإجابة (صورة/فيديو)",
+      "createButton": "إنشاء السؤال",
+      "updateButton": "تحديث السؤال",
+      "cancel": "إلغاء",
+      "deleteTitle": "حذف السؤال",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا السؤال؟",
+      "deleteWarning": "لا يمكن التراجع عن هذا الإجراء.",
+      "deleteButton": "حذف"
+    },
+    "difficulty": {
+      "easy": "سهل",
+      "medium": "متوسط",
+      "hard": "صعب"
+    },
+    "validation": {
+      "questionRequired": "نص السؤال مطلوب",
+      "answerRequired": "نص الإجابة مطلوب",
+      "difficultyRequired": "مستوى الصعوبة مطلوب"
+    }
+  },
+  "countries": {
+    "title": "الدول",
+    "subtitle": "إدارة الدول وأعلامها",
+    "addCountry": "إضافة دولة",
+    "searchPlaceholder": "البحث في الدول...",
+    "itemsPerPage": "العناصر في الصفحة",
+    "total": "المجموع",
+    "loading": "جاري تحميل الدول...",
+    "emptyTitle": "لم يتم العثور على دول",
+    "emptySubtitle": "أنشئ دولتك الأولى للبدء",
+    "createCountry": "إنشاء دولة",
+    "dialog": {
+      "createTitle": "إنشاء دولة جديدة",
+      "editTitle": "تعديل الدولة",
+      "name": "اسم الدولة",
+      "media": "صورة العلم",
+      "createButton": "إنشاء الدولة",
+      "updateButton": "تحديث الدولة",
+      "cancel": "إلغاء",
+      "deleteTitle": "حذف الدولة",
+      "deleteConfirm": "هل أنت متأكد من حذف \"{name}\"؟",
+      "deleteWarning": "لا يمكن التراجع عن هذا الإجراء.",
+      "deleteButton": "حذف"
+    },
+    "validation": {
+      "nameRequired": "اسم الدولة مطلوب",
+      "nameMinLength": "الاسم يجب أن يكون حرفين على الأقل"
+    }
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "مرحباً بك في لوحة إدارة لعبة الأسئلة",
+    "stats": {
+      "totalCategories": "إجمالي الفئات",
+      "totalQuestions": "إجمالي الأسئلة",
+      "recentActivity": "النشاط الأخير"
+    }
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "التسجيل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "name": "الاسم",
+    "loginButton": "تسجيل الدخول",
+    "registerButton": "التسجيل",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟",
+    "validation": {
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailValid": "يرجى إدخال بريد إلكتروني صحيح",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+      "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+      "passwordsMatch": "كلمات المرور يجب أن تتطابق",
+      "nameRequired": "الاسم مطلوب"
+    }
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "search": "بحث",
+    "filter": "تصفية",
+    "clear": "مسح",
+    "actions": "الإجراءات",
+    "id": "الرقم",
+    "category": "الفئة",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "تاريخ التحديث",
+    "noData": "لا توجد بيانات متاحة",
+    "error": "خطأ",
+    "success": "نجح",
+    "warning": "تحذير",
+    "info": "معلومات"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "switchLanguage": "تغيير اللغة"
+  },
+  "users": {
+    "title": "المستخدمين",
+    "subtitle": "هذه صفحة إدارة المستخدمين",
+    "table": {
+      "headers": {
+        "name": "الإسم",
+        "id": "المعرف",
+        "availableGames": "الألعاب المتاحة",
+        "role": "الدور",
+        "createdAt": "تاريخ الإنشاء"
+      }
+    }
+  },
+  "payments": {
+    "title": "الدفعات",
+    "subtitle": "هذه الصفحة لإدارة الدفعات",
+    "table": {
+      "headers": {
+        "username": "إسم المستخدم",
+        "id": "المعرف",
+        "amount": "الكمية",
+        "status": "الحالة",
+        "gamesPurchased": "الألعاب المشتراه",
+        "paymobOrderId": "Paymob Order ID",
+        "createdAt": "تاريخ الإنشاء"
+      }
+    }
+  },
+    "prices": {
+    "title": "الأسعار",
+    "updatePrice": "تحديث السعر",
+    "confirmDeleteMessage": "هل أنت متأكد أنك تريد حذف هذا السعر؟",
+    "deletePrice": "حذف السعر",
+    "subtitle": "هذه الصفحة مخصصة لإدارة الأسعار",
+    "addPrice": "إضافة سعر",
+    "table": {
+      "headers": {
+        "username": "اسم المستخدم",
+        "id": "الرقم التعريفي",
+        "price": "السعر",
+        "discount": "الخصم",
+        "gamesNumber": "عدد الألعاب المشتراة",
+        "totalPrice": "السعر الإجمالي",
+        "createdAt": "تاريخ الإنشاء",
+        "actions": "الإجراءات"
+      }
+    }
+  },
+  "form": {
+    "required": "هذا الحقل مطلوب",
+    "positiveNumber": "يرجى إدخال رقم موجب",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  }
+}
