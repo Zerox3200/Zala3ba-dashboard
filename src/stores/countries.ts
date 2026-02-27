@@ -108,7 +108,6 @@ export const useCountriesStore = defineStore("countries", () => {
     loading.value = true;
     try {
       const formData = new FormData();
-      formData.append("_method", "PUT");
       formData.append("name", countryData.name);
       if (countryData.image) {
         formData.append("image", countryData.image);
