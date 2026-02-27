@@ -29,7 +29,7 @@ export interface AuthResponse {
 export interface Country {
   id: number;
   name: string;
-  media_url?: string;
+  image?: string;
   created_at: string;
   updated_at: string;
 }
