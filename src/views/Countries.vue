@@ -213,8 +213,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
             >
               <v-card class="custom-card country-card" elevation="8">
                 <v-img
-                  v-if="country.image"
-                  :src="`${API_BASE_URL}/storage/${country.image}`"
+                  v-if="country.media_url"
+                  :src="`${API_BASE_URL}/storage/${country.media_url}`"
                   height="200"
                   cover
                   class="country-image"
