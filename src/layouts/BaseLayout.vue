@@ -78,6 +78,14 @@ const handleLogout = async () => {
           class="custom-list-item"
         />
         <v-list-item
+          prepend-icon="mdi-cellphone-cog"
+          :title="t('navigation.versions')"
+          value="versions"
+          @click="$router.push('/versions')"
+          :active="$route.path === '/versions'"
+          class="custom-list-item"
+        />
+        <v-list-item
           prepend-icon="mdi-currency-usd"
           :title="t('navigation.prices')"
           value="prices"

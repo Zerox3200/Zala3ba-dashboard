@@ -4,6 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.vue";
 import { Price } from "../types/Price";
 import axios from "axios";
 import AppHeader from "../components/AppHeader.vue";
+import FormattedDate from "../components/FormattedDate.vue";
 import { useI18n } from "vue-i18n";
 import { VDataTableServer } from "vuetify/lib/components/VDataTable/VDataTableServer";
 import { VForm } from "vuetify/lib/components/VForm/VForm";
@@ -302,6 +303,9 @@ const onDeletePrice = async (id?: number) => {
           item-value="name"
           @update:options="loadPrices"
         >
+          <template #item.created_at="{ item }">
+            <FormattedDate :value="item.created_at" />
+          </template>
           <template #item.actions="{ item }">
             <v-btn icon variant="text" @click="onOpenUpdatePriceDialog(item)">
               <v-icon>mdi-pencil</v-icon>

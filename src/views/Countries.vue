@@ -4,7 +4,9 @@ import { useI18n } from "vue-i18n";
 import { useCountriesStore } from "../stores/countries";
 import type { Country, CountryFormData } from "../types";
 import AppHeader from "../components/AppHeader.vue";
+import FormattedDate from "../components/FormattedDate.vue";
 import BaseLayout from "../layouts/BaseLayout.vue";
+import { mediaUrl } from "../utils/mediaUrl";
 
 const { t } = useI18n();
 const countriesStore = useCountriesStore();
@@ -136,8 +138,6 @@ const closeDeleteDialog = (): void => {
 onMounted(() => {
   fetchCountries();
 });
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 </script>
 
 <template>
@@ -214,7 +214,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
               <v-card class="custom-card country-card" elevation="8">
                 <v-img
                   v-if="country.image"
-                  :src="`${API_BASE_URL}/storage/${country.image}`"
+                  :src="mediaUrl(country.image)"
                   height="200"
                   cover
                   class="country-image"
@@ -231,6 +231,13 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                   <h3 class="text-h6 font-weight-bold mb-2">
                     {{ country.name }}
                   </h3>
+
+                  <div v-if="country.created_at" class="mb-4">
+                    <span class="text-caption text-medium-emphasis d-block mb-1">
+                      {{ t("common.createdAt") }}
+                    </span>
+                    <FormattedDate :value="country.created_at" />
+                  </div>
 
                   <div class="d-flex justify-space-between align-center">
                     <v-chip color="primary" variant="tonal" size="small">

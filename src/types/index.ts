@@ -1,17 +1,19 @@
 // User types
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  created_at: string;
-  updated_at: string;
-}
+import type { User, CreateUserPayload, UpdateUserPayload } from "./User";
+
+export type { User, CreateUserPayload, UpdateUserPayload };
+
+export type {
+  AppPlatform,
+  AppVersion,
+  AppVersionCreatePayload,
+  AppVersionUpdatePayload,
+} from "./AppVersion";
 
 // Authentication types
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
+export type LoginCredentials =
+  | { email: string; password: string }
+  | { phone_number: string; password: string };
 
 export interface RegisterData {
   name: string;
@@ -61,16 +63,25 @@ export interface CategoryFormData {
 }
 
 // Question types
+export interface QuestionMediaItem {
+  id: number | null;
+  question_id: number;
+  side: "question" | "answer";
+  media_url: string;
+  media_type: string;
+  order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Question {
   id: number;
   question_text: string;
   answer_text: string;
   difficulty: "easy" | "medium" | "hard";
   category_id: number;
-  question_media_url?: string;
-  question_media_type?: string;
-  answer_media_url?: string;
-  answer_media_type?: string;
+  question_media: QuestionMediaItem[];
+  answer_media: QuestionMediaItem[];
   created_at: string;
   updated_at: string;
 }
@@ -80,8 +91,8 @@ export interface QuestionFormData {
   answer_text: string;
   difficulty: "easy" | "medium" | "hard";
   category_id: number;
-  question_media?: File;
-  answer_media?: File;
+  question_media: File[];
+  answer_media: File[];
 }
 
 // Pagination types
@@ -99,6 +110,11 @@ export interface ApiResponse<T> {
   last_page: number;
   per_page: number;
   total: number;
+}
+
+export interface PaginatedApiResponse<T> {
+  data: T[];
+  meta: Pagination;
 }
 
 export interface ApiResult<T = any> {

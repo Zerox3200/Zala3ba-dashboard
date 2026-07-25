@@ -3,10 +3,10 @@ import { User } from ".";
 export interface Payment {
   id: number;
   user_id: number;
-  paymob_order_id: number;
-  amount: number;
+  fawaterak_invoice_id: string;
+  amount: string;
   games_purchased: number;
-  status: "pending" | "successful";
+  status: "pending" | "successful" | "failed";
   created_at: string;
   updated_at: string;
   user: User;

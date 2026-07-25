@@ -49,33 +49,46 @@ export const useQuestionsStore = defineStore("questions", () => {
     }
   };
 
+  const toFileList = (value?: File[] | File | null): File[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+      return value.filter((file): file is File => file instanceof File);
+    }
+    return value instanceof File ? [value] : [];
+  };
+
+  const appendQuestionFormData = (
+    formData: FormData,
+    questionData: QuestionFormData
+  ) => {
+    formData.append("question_text", questionData.question_text);
+    formData.append("answer_text", questionData.answer_text);
+    formData.append("difficulty", questionData.difficulty);
+    formData.append("category_id", String(questionData.category_id));
+
+    const questionFiles = toFileList(questionData.question_media);
+    questionFiles.forEach((file, index) => {
+      formData.append(`question_media[${index}]`, file);
+    });
+
+    const answerFiles = toFileList(questionData.answer_media);
+    answerFiles.forEach((file, index) => {
+      formData.append(`answer_media[${index}]`, file);
+    });
+  };
+
   const createQuestion = async (
     questionData: QuestionFormData
   ): Promise<ApiResult<Question>> => {
     loading.value = true;
     try {
       const formData = new FormData();
-      formData.append("question_text", questionData.question_text);
-      formData.append("answer_text", questionData.answer_text);
-      formData.append("difficulty", questionData.difficulty);
-      formData.append("category_id", questionData.category_id.toString());
+      appendQuestionFormData(formData, questionData);
 
-      if (questionData.question_media) {
-        formData.append("question_media", questionData.question_media);
-      }
-
-      if (questionData.answer_media) {
-        formData.append("answer_media", questionData.answer_media);
-      }
-
+      // Let the browser set multipart Content-Type with boundary
       const response = await axios.post(
         `${API_BASE_URL}/api/questions`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
       await fetchQuestions({ category_id: questionData.category_id });
@@ -85,6 +98,7 @@ export const useQuestionsStore = defineStore("questions", () => {
       return {
         success: false,
         message: error.response?.data?.message || "فشل في إنشاء السؤال",
+        data: error.response?.data,
       };
     } finally {
       loading.value = false;
@@ -98,27 +112,12 @@ export const useQuestionsStore = defineStore("questions", () => {
     loading.value = true;
     try {
       const formData = new FormData();
-      formData.append("question_text", questionData.question_text);
-      formData.append("answer_text", questionData.answer_text);
-      formData.append("difficulty", questionData.difficulty);
-      formData.append("category_id", questionData.category_id.toString());
+      appendQuestionFormData(formData, questionData);
 
-      if (questionData.question_media) {
-        formData.append("question_media", questionData.question_media);
-      }
-
-      if (questionData.answer_media) {
-        formData.append("answer_media", questionData.answer_media);
-      }
-
+      // Let the browser set multipart Content-Type with boundary
       const response = await axios.post(
         `${API_BASE_URL}/api/questions/${id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
       await fetchQuestions({ category_id: questionData.category_id });
@@ -128,6 +127,7 @@ export const useQuestionsStore = defineStore("questions", () => {
       return {
         success: false,
         message: error.response?.data?.message || "فشل في تحديث السؤال",
+        data: error.response?.data,
       };
     } finally {
       loading.value = false;

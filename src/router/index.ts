@@ -48,6 +48,12 @@ const routes = [
     component: () => import("../views/Prices.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    path: "/versions",
+    name: "إصدارات التطبيق",
+    component: () => import("../views/AppVersions.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({

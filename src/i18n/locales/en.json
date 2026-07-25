@@ -5,16 +5,20 @@
     "adminPanel": "Admin Panel"
   },
   "login": {
-    "title" : "Game",
+    "title": "Game",
     "subtitle": "Admin Panal",
     "email": "Email",
+    "emailOrPhone": "Email or phone number",
     "password": "Password",
     "login": "Login",
     "errors": {
       "requiredEmail": "Email is required",
+      "requiredIdentifier": "Email or phone number is required",
       "correctEmail": "Email must be correct",
+      "correctIdentifier": "Enter a valid email or phone number",
       "requirePassword": "Password is required",
-      "correctPassword": "Password must be 8 charcter at least"
+      "correctPassword": "Password must be 8 charcter at least",
+      "loginFailed": "Login failed. Please check your credentials."
     }
   },
   "navigation": {
@@ -24,7 +28,8 @@
     "users": "Users",
     "payments": "Payments",
     "prices": "Prices",
-    "countries": "Countries"
+    "countries": "Countries",
+    "versions": "App Versions"
   },
   "categories": {
     "title": "Categories",
@@ -81,9 +86,11 @@
     "itemsPerPageLabel": "Items per page",
     "totalQuestions": "Total Questions",
     "answer": "Answer",
-    "questionMedia": "Question Media:",
-    "answerMedia": "Answer Media:",
-    "viewFile": "View File",
+    "questionMedia": "Question Media",
+    "answerMedia": "Answer Media",
+    "mediaCount": "{count} file(s)",
+    "noMedia": "No media",
+    "viewFile": "Open file",
     "viewDetails": "View Details",
     "edit": "Edit",
     "delete": "Delete",
@@ -94,14 +101,18 @@
     "editQuestion": "Edit Question",
     "addNewQuestion": "Add New Question",
     "mediaFiles": "Media Files",
+    "errors": {
+      "generic": "Something went wrong. Please try again."
+    },
     "dialog": {
       "createTitle": "Create New Question",
       "editTitle": "Edit Question",
       "questionText": "Question Text",
       "answerText": "Answer Text",
       "difficulty": "Difficulty",
-      "questionMedia": "Question Media (Image/Video)",
-      "answerMedia": "Answer Media (Image/Video)",
+      "questionMedia": "Question Media",
+      "answerMedia": "Answer Media",
+      "mediaMultipleHint": "You can select multiple images at once",
       "createButton": "Create Question",
       "updateButton": "Update Question",
       "cancel": "Cancel",
@@ -199,7 +210,7 @@
     "actions": "Actions",
     "id": "ID",
     "category": "Category",
-    "createdAt": "Created At",
+    "createdAt": "Date",
     "updatedAt": "Updated At",
     "noData": "No data available",
     "error": "Error",
@@ -212,31 +223,97 @@
     "ar": "العربية",
     "switchLanguage": "Switch Language"
   },
-    "users": {
+  "users": {
     "title": "Users",
-    "subtitle": "This is page to manage users",
+    "subtitle": "Manage players and their available games",
+    "addUser": "Create User",
+    "searchPlaceholder": "Search by name...",
+    "itemsPerPage": "Items per page",
+    "total": "Total users",
+    "roles": {
+      "user": "User",
+      "admin": "Admin"
+    },
     "table": {
+      "notAvailable": "—",
+      "verified": "Verified",
+      "notVerified": "Pending",
       "headers": {
         "name": "Name",
+        "email": "Email",
         "id": "ID",
+        "phone": "Phone",
+        "emailVerified": "Email verified",
+        "phoneVerified": "Phone verified",
         "availableGames": "Available Games",
         "role": "Role",
-        "createdAt": "Created At"
+        "createdAt": "Date",
+        "actions": "Actions"
       }
+    },
+    "dialog": {
+      "createTitle": "Create New User",
+      "createSubtitle": "Add a player account with login credentials and game balance",
+      "mobileSubtitle": "Step by step — no scrolling needed",
+      "mobileReview": "Review",
+      "sectionAccount": "Account",
+      "sectionContact": "Contact",
+      "sectionGames": "Game balance",
+      "countryCodeHint": "e.g. +20",
+      "passwordHint": "Minimum 6 characters",
+      "defaultRoleNote": "New users are created as players",
+      "updateTitle": "Update User",
+      "updateSubtitle": "Adjust available games for {name}",
+      "deleteTitle": "Delete User Permanently",
+      "deleteConfirm": "You are about to delete \"{name}\" ({email}).",
+      "deleteWarning": "This action cannot be undone. The user and their data will be removed permanently.",
+      "deleteButton": "Delete permanently",
+      "name": "Full name",
+      "email": "Email address",
+      "countryCode": "Country code",
+      "phoneNumber": "Phone number",
+      "role": "Role",
+      "availableGames": "Available games",
+      "password": "Password",
+      "createButton": "Create user",
+      "updateButton": "Save changes",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "countryCodeRequired": "Country code is required",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "availableGamesRequired": "Available games is required",
+      "availableGamesMin": "Available games cannot be negative"
     }
   },
   "payments": {
     "title": "Payments",
     "subtitle": "This is page to manage payments",
+    "filterByStatus": "Filter by status",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "successful": "Successful",
+      "failed": "Failed"
+    },
     "table": {
+      "unavailable": "Unavailable",
       "headers": {
         "username": "username",
         "id": "ID",
         "amount": "Amount",
         "status": "Status",
         "gamesPurchased": "Games Purchased",
-        "paymobOrderId": "Paymob Order ID",
-        "createdAt": "Created At"
+        "fawaterakInvoiceId": "Fawaterak Invoice ID",
+        "createdAt": "Date"
       }
     }
   },
@@ -255,9 +332,46 @@
         "discount": "Discount",
         "gamesNumber": "Games Purchased",
         "totalPrice": "Total Price",
-        "createdAt": "Created At",
+        "createdAt": "Date",
         "actions": "Actions"
       }
+    }
+  },
+  "versions": {
+    "title": "App Versions",
+    "subtitle": "Manage Android and iOS app release settings",
+    "addVersion": "Create version",
+    "refresh": "Refresh",
+    "latest": "Latest",
+    "minRequired": "Min required",
+    "forceUpdateOn": "Force update enabled",
+    "forceUpdateOff": "Force update disabled",
+    "openStore": "Open store link",
+    "updateVersion": "Edit version",
+    "createTitle": "Create app version",
+    "updateTitle": "Update {platform} version",
+    "createButton": "Create version",
+    "saveButton": "Save changes",
+    "emptyTitle": "No version configured",
+    "emptySubtitle": "Create a version entry for this platform",
+    "platforms": {
+      "android": "Android",
+      "ios": "iOS"
+    },
+    "fields": {
+      "platform": "Platform",
+      "latestVersion": "Latest version",
+      "minRequiredVersion": "Minimum required version",
+      "forceUpdate": "Force update",
+      "updateMessage": "Update message",
+      "updateUrl": "Store URL",
+      "releaseNotes": "Release notes"
+    },
+    "validation": {
+      "invalidUrl": "Enter a valid URL"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again."
     }
   },
   "form": {

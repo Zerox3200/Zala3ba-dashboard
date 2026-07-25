@@ -8,7 +8,9 @@ import { useCountriesStore } from "../stores/countries";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import type { Category, CategoryFormData } from "../types";
 import AppHeader from "../components/AppHeader.vue";
+import FormattedDate from "../components/FormattedDate.vue";
 import BaseLayout from "../layouts/BaseLayout.vue";
+import { mediaUrl } from "../utils/mediaUrl";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -184,8 +186,6 @@ const showIMage = ref([
     value: "no",
   },
 ]);
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 </script>
 
 <template>
@@ -262,7 +262,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
               <v-card class="custom-card category-card" elevation="8">
                 <v-img
                   v-if="category.media_url"
-                  :src="`${API_BASE_URL}/storage/${category.media_url}`"
+                  :src="mediaUrl(category.media_url)"
                   height="200"
                   cover
                   class="category-image"
@@ -282,6 +282,13 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                   <p class="text-body-2 text-grey-darken-1 mb-4">
                     {{ category.description || t("categories.noDescription") }}
                   </p>
+
+                  <div v-if="category.created_at" class="mb-4">
+                    <span class="text-caption text-medium-emphasis d-block mb-1">
+                      {{ t("common.createdAt") }}
+                    </span>
+                    <FormattedDate :value="category.created_at" />
+                  </div>
 
                   <div class="d-flex justify-space-between align-center">
                     <div class="d-flex align-center" style="gap: 6px; flex-wrap: wrap">

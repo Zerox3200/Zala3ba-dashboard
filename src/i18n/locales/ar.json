@@ -5,14 +5,17 @@
     "adminPanel": "لوحة الإدارة"
   },
   "login": {
-    "title" : "اللعبة",
+    "title": "اللعبة",
     "subtitle": "لوحة الإدارة",
     "email": "البريد الإلكتروني",
-    "password":"كلمة المرور",
-    "login":"تسجيل الدخول",
+    "emailOrPhone": "البريد الإلكتروني أو رقم الهاتف",
+    "password": "كلمة المرور",
+    "login": "تسجيل الدخول",
     "errors": {
       "requiredEmail": "يجب إدخال البريد الإلكتروني",
+      "requiredIdentifier": "البريد الإلكتروني أو رقم الهاتف مطلوب",
       "correctEmail": "البريد الإلكتروني يجب أن يكون صحيحاً",
+      "correctIdentifier": "أدخل بريداً إلكترونياً أو رقم هاتف صالحاً",
       "requirePassword": "كلمة المرور مطلوبة",
       "correctPassword": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
       "loginFailed": "فشل في تسجيل الدخول"
@@ -25,7 +28,8 @@
     "users": "المستخدمين",
     "payments": "الدفع",
     "prices": "الأسعار",
-    "countries": "الدول"
+    "countries": "الدول",
+    "versions": "إصدارات التطبيق"
   },
   "categories": {
     "title": "الفئات",
@@ -82,9 +86,11 @@
     "itemsPerPageLabel": "العناصر في الصفحة",
     "totalQuestions": "إجمالي الأسئلة",
     "answer": "الإجابة",
-    "questionMedia": "وسائط السؤال:",
-    "answerMedia": "وسائط الإجابة:",
-    "viewFile": "عرض الملف",
+    "questionMedia": "الوسائط السؤال",
+    "answerMedia": "الوسائط الإجابة",
+    "mediaCount": "{count} ملف",
+    "noMedia": "لا توجد وسائط",
+    "viewFile": "فتح الملف",
     "viewDetails": "عرض التفاصيل",
     "edit": "تعديل",
     "delete": "حذف",
@@ -95,14 +101,18 @@
     "editQuestion": "تعديل السؤال",
     "addNewQuestion": "إضافة سؤال جديد",
     "mediaFiles": "ملفات الوسائط",
+    "errors": {
+      "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    },
     "dialog": {
       "createTitle": "إنشاء سؤال جديد",
       "editTitle": "تعديل السؤال",
       "questionText": "نص السؤال",
       "answerText": "نص الإجابة",
       "difficulty": "الصعوبة",
-      "questionMedia": "وسائط السؤال (صورة/فيديو)",
-      "answerMedia": "وسائط الإجابة (صورة/فيديو)",
+      "questionMedia": "صور السؤال",
+      "answerMedia": "صور الإجابة",
+      "mediaMultipleHint": "يمكنك اختيار عدة صور دفعة واحدة",
       "createButton": "إنشاء السؤال",
       "updateButton": "تحديث السؤال",
       "cancel": "إلغاء",
@@ -215,33 +225,99 @@
   },
   "users": {
     "title": "المستخدمين",
-    "subtitle": "هذه صفحة إدارة المستخدمين",
+    "subtitle": "إدارة اللاعبين والألعاب المتاحة لهم",
+    "addUser": "إنشاء مستخدم",
+    "searchPlaceholder": "البحث بالاسم...",
+    "itemsPerPage": "العناصر في الصفحة",
+    "total": "إجمالي المستخدمين",
+    "roles": {
+      "user": "مستخدم",
+      "admin": "مسؤول"
+    },
     "table": {
+      "notAvailable": "—",
+      "verified": "موثّق",
+      "notVerified": "قيد الانتظار",
       "headers": {
         "name": "الإسم",
+        "email": "البريد الإلكتروني",
         "id": "المعرف",
+        "phone": "الهاتف",
+        "emailVerified": "البريد موثّق",
+        "phoneVerified": "الهاتف موثّق",
         "availableGames": "الألعاب المتاحة",
         "role": "الدور",
-        "createdAt": "تاريخ الإنشاء"
+        "createdAt": "تاريخ الإنشاء",
+        "actions": "الإجراءات"
       }
+    },
+    "dialog": {
+      "createTitle": "إنشاء مستخدم جديد",
+      "createSubtitle": "أضف حساب لاعب مع بيانات الدخول وعدد الألعاب المتاحة",
+      "mobileSubtitle": "خطوة بخطوة — بدون تمرير",
+      "mobileReview": "مراجعة",
+      "sectionAccount": "الحساب",
+      "sectionContact": "التواصل",
+      "sectionGames": "رصيد الألعاب",
+      "countryCodeHint": "مثال: +20",
+      "passwordHint": "6 أحرف على الأقل",
+      "defaultRoleNote": "يُنشأ المستخدم الجديد كلاعب",
+      "updateTitle": "تحديث المستخدم",
+      "updateSubtitle": "تعديل الألعاب المتاحة لـ {name}",
+      "deleteTitle": "حذف المستخدم نهائياً",
+      "deleteConfirm": "أنت على وشك حذف \"{name}\" ({email}).",
+      "deleteWarning": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف المستخدم وبياناته بشكل دائم.",
+      "deleteButton": "حذف نهائي",
+      "name": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "countryCode": "رمز الدولة",
+      "phoneNumber": "رقم الهاتف",
+      "role": "الدور",
+      "availableGames": "الألعاب المتاحة",
+      "password": "كلمة المرور",
+      "createButton": "إنشاء المستخدم",
+      "updateButton": "حفظ التغييرات",
+      "cancel": "إلغاء"
+    },
+    "errors": {
+      "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    },
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريداً إلكترونياً صالحاً",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "countryCodeRequired": "رمز الدولة مطلوب",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+      "availableGamesRequired": "عدد الألعاب المتاحة مطلوب",
+      "availableGamesMin": "لا يمكن أن يكون عدد الألعاب سالباً"
     }
   },
   "payments": {
     "title": "الدفعات",
     "subtitle": "هذه الصفحة لإدارة الدفعات",
+    "filterByStatus": "تصفية حسب الحالة",
+    "status": {
+      "all": "الكل",
+      "pending": "قيد الانتظار",
+      "successful": "ناجحة",
+      "failed": "فاشلة"
+    },
     "table": {
+      "unavailable": "غير متاح",
       "headers": {
         "username": "إسم المستخدم",
         "id": "المعرف",
         "amount": "الكمية",
         "status": "الحالة",
         "gamesPurchased": "الألعاب المشتراه",
-        "paymobOrderId": "Paymob Order ID",
+        "fawaterakInvoiceId": "معرف فاتورة فواتيرك",
         "createdAt": "تاريخ الإنشاء"
       }
     }
   },
-    "prices": {
+  "prices": {
     "title": "الأسعار",
     "updatePrice": "تحديث السعر",
     "confirmDeleteMessage": "هل أنت متأكد أنك تريد حذف هذا السعر؟",
@@ -259,6 +335,43 @@
         "createdAt": "تاريخ الإنشاء",
         "actions": "الإجراءات"
       }
+    }
+  },
+  "versions": {
+    "title": "إصدارات التطبيق",
+    "subtitle": "إدارة إعدادات إصدار تطبيق أندرويد و iOS",
+    "addVersion": "إنشاء إصدار",
+    "refresh": "تحديث",
+    "latest": "الأحدث",
+    "minRequired": "الحد الأدنى",
+    "forceUpdateOn": "التحديث الإجباري مفعّل",
+    "forceUpdateOff": "التحديث الإجباري معطّل",
+    "openStore": "فتح رابط المتجر",
+    "updateVersion": "تعديل الإصدار",
+    "createTitle": "إنشاء إصدار للتطبيق",
+    "updateTitle": "تحديث إصدار {platform}",
+    "createButton": "إنشاء الإصدار",
+    "saveButton": "حفظ التغييرات",
+    "emptyTitle": "لا يوجد إصدار مُعد",
+    "emptySubtitle": "أنشئ إدخال إصدار لهذه المنصة",
+    "platforms": {
+      "android": "أندرويد",
+      "ios": "iOS"
+    },
+    "fields": {
+      "platform": "المنصة",
+      "latestVersion": "أحدث إصدار",
+      "minRequiredVersion": "الحد الأدنى للإصدار المطلوب",
+      "forceUpdate": "تحديث إجباري",
+      "updateMessage": "رسالة التحديث",
+      "updateUrl": "رابط المتجر",
+      "releaseNotes": "ملاحظات الإصدار"
+    },
+    "validation": {
+      "invalidUrl": "أدخل رابطاً صالحاً"
+    },
+    "errors": {
+      "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
     }
   },
   "form": {

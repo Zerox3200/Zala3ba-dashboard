@@ -4,10 +4,12 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCategoriesStore } from "../stores/categories";
 import { useQuestionsStore } from "../stores/questions";
-import { Category, Question } from "../types";
+import { Category, Question, QuestionMediaItem } from "../types";
 import type { VForm } from "vuetify/lib/components/VForm";
 import AppHeader from "../components/AppHeader.vue";
+import FormattedDate from "../components/FormattedDate.vue";
 import BaseLayout from "../layouts/BaseLayout.vue";
+import { mediaUrl } from "../utils/mediaUrl";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -30,9 +32,51 @@ const questionFormData = reactive({
   answer_text: "",
   difficulty: "medium" as "medium" | "easy" | "hard",
   category_id: +route.params.id,
-  question_media: undefined as File | undefined,
-  answer_media: undefined as File | undefined,
+  question_media: [] as File[],
+  answer_media: [] as File[],
 });
+
+const resetMediaFields = () => {
+  questionFormData.question_media = [];
+  questionFormData.answer_media = [];
+};
+
+const normalizeFiles = (files: File | File[] | null | undefined): File[] => {
+  if (!files) return [];
+  if (Array.isArray(files)) {
+    return files.filter((file): file is File => file instanceof File);
+  }
+  return files instanceof File ? [files] : [];
+};
+
+const onQuestionMediaChange = (files: File | File[] | null) => {
+  questionFormData.question_media = normalizeFiles(files);
+};
+
+const onAnswerMediaChange = (files: File | File[] | null) => {
+  questionFormData.answer_media = normalizeFiles(files);
+};
+
+const formErrorMessage = ref("");
+const formFieldErrors = ref<Record<string, string>>({});
+
+const clearFormErrors = () => {
+  formErrorMessage.value = "";
+  formFieldErrors.value = {};
+};
+
+const setFormApiErrors = (result: { message?: string; data?: any }) => {
+  clearFormErrors();
+  formErrorMessage.value = result.message || t("questions.errors.generic");
+  const errors = result.data?.errors as Record<string, string[]> | undefined;
+  if (errors) {
+    for (const [field, messages] of Object.entries(errors)) {
+      if (messages?.length) {
+        formFieldErrors.value[field] = messages[0];
+      }
+    }
+  }
+};
 
 const difficultyOptions = [
   { title: t("questions.difficulty.easy"), value: "easy" },
@@ -100,8 +144,8 @@ const editQuestion = (question: Question) => {
   questionFormData.question_text = question.question_text;
   questionFormData.answer_text = question.answer_text;
   questionFormData.difficulty = question.difficulty;
-  questionFormData.question_media = undefined;
-  questionFormData.answer_media = undefined;
+  resetMediaFields();
+  clearFormErrors();
   showCreateDialog.value = true;
 };
 
@@ -130,21 +174,35 @@ const handleSubmit = async () => {
     const { valid } = await questionForm.value.validate();
     if (!valid) return;
 
+    clearFormErrors();
+
+    const payload = {
+      question_text: questionFormData.question_text,
+      answer_text: questionFormData.answer_text,
+      difficulty: questionFormData.difficulty,
+      category_id: questionFormData.category_id,
+      question_media: normalizeFiles(questionFormData.question_media),
+      answer_media: normalizeFiles(questionFormData.answer_media),
+    };
+
     let result;
     if (editingQuestion.value) {
       result = await questionsStore.updateQuestion(
         editingQuestion.value.id,
-        questionFormData
+        payload
       );
     } else {
-      result = await questionsStore.createQuestion(questionFormData);
+      result = await questionsStore.createQuestion(payload);
     }
 
     if (result.success) {
       closeDialog();
+    } else {
+      setFormApiErrors(result);
     }
   } catch (error) {
     console.error("Error submitting form:", error);
+    formErrorMessage.value = t("questions.errors.generic");
   }
 };
 
@@ -154,8 +212,8 @@ const closeDialog = () => {
   questionFormData.question_text = "";
   questionFormData.answer_text = "";
   questionFormData.difficulty = "medium";
-  questionFormData.question_media = undefined;
-  questionFormData.answer_media = undefined;
+  resetMediaFields();
+  clearFormErrors();
 };
 
 const closeDeleteDialog = () => {
@@ -168,8 +226,8 @@ const openCreateDialog = () => {
   questionFormData.question_text = "";
   questionFormData.answer_text = "";
   questionFormData.difficulty = "medium";
-  questionFormData.question_media = undefined;
-  questionFormData.answer_media = undefined;
+  resetMediaFields();
+  clearFormErrors();
   showCreateDialog.value = true;
 };
 
@@ -186,24 +244,46 @@ const getDifficultyColor = (difficulty: "easy" | "medium" | "hard") => {
   }
 };
 
-const isImage = (mimeType?: string) => {
-  return mimeType && mimeType.startsWith("image/");
+const isImage = (mimeType?: string | null) => {
+  return !!mimeType && mimeType.startsWith("image/");
 };
 
-const isVideo = (mimeType?: string) => {
-  return mimeType && mimeType.startsWith("video/");
+const isVideo = (mimeType?: string | null) => {
+  return !!mimeType && mimeType.startsWith("video/");
 };
 
-const isAudio = (mimeType?: string) => {
-  return mimeType && mimeType.startsWith("audio/");
+const isAudio = (mimeType?: string | null) => {
+  return !!mimeType && mimeType.startsWith("audio/");
+};
+
+const sortedMedia = (items?: QuestionMediaItem[] | null) => {
+  if (!Array.isArray(items)) return [];
+  return [...items].sort((a, b) => (a.order || 0) - (b.order || 0));
+};
+
+const hasQuestionMedia = (question: Question) =>
+  sortedMedia(question.question_media).length > 0;
+
+const hasAnswerMedia = (question: Question) =>
+  sortedMedia(question.answer_media).length > 0;
+
+const previewMedia = ref<QuestionMediaItem | null>(null);
+const showMediaPreview = ref(false);
+
+const openMediaPreview = (media: QuestionMediaItem) => {
+  previewMedia.value = media;
+  showMediaPreview.value = true;
+};
+
+const closeMediaPreview = () => {
+  showMediaPreview.value = false;
+  previewMedia.value = null;
 };
 
 onMounted(async () => {
   await fetchCategory();
   await fetchQuestions();
 });
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 </script>
 
 <template>
@@ -283,6 +363,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                         <strong>{{ t("questions.answer") }}:</strong>
                         {{ question.answer_text }}
                       </p>
+                      <div v-if="question.created_at" class="mt-3">
+                        <span
+                          class="text-caption text-medium-emphasis d-block mb-1"
+                        >
+                          {{ t("common.createdAt") }}
+                        </span>
+                        <FormattedDate :value="question.created_at" />
+                      </div>
                     </div>
 
                     <div class="d-flex flex-column align-end gap-2">
@@ -323,102 +411,173 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                     </div>
                   </div>
 
-                  <!-- Media Preview -->
-                  <div
-                    v-if="
-                      question.question_media_url || question.answer_media_url
-                    "
-                    class="mt-4"
-                  >
-                    <v-divider class="mb-4"></v-divider>
+                  <!-- Media galleries -->
+                  <div class="media-section mt-5">
+                    <v-row dense>
+                      <v-col cols="12" md="6">
+                        <div class="media-panel">
+                          <div class="media-panel__header">
+                            <div class="d-flex align-center ga-2">
+                              <v-avatar
+                                color="primary"
+                                variant="tonal"
+                                size="32"
+                              >
+                                <v-icon size="18">mdi-help-circle-outline</v-icon>
+                              </v-avatar>
+                              <div>
+                                <p class="media-panel__title mb-0">
+                                  {{ t("questions.questionMedia") }}
+                                </p>
+                                <p class="media-panel__subtitle mb-0">
+                                  {{
+                                    t("questions.mediaCount", {
+                                      count: sortedMedia(question.question_media)
+                                        .length,
+                                    })
+                                  }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
 
-                    <div class="d-flex gap-4">
-                      <div
-                        v-if="question.question_media_url"
-                        class="media-preview"
-                      >
-                        <h4 class="text-subtitle-2 font-weight-bold mb-2">
-                          {{ t("questions.questionMedia") }}
-                        </h4>
-                        <v-img
-                          v-if="isImage(question?.question_media_type)"
-                          :src="`${API_BASE_URL}/storage/${question.question_media_url}`"
-                          width="150"
-                          height="100"
-                          cover
-                          class="rounded"
-                        />
-                        <video
-                          v-else-if="isVideo(question?.question_media_type)"
-                          :src="`${API_BASE_URL}/storage/${question.question_media_url}`"
-                          width="150"
-                          height="100"
-                          controls
-                          class="rounded"
-                        />
-                        <audio
-                          v-else-if="isAudio(question?.question_media_type)"
-                          controls
-                        >
-                          <source
-                            :src="`${API_BASE_URL}/storage/${question.question_media_url}`"
-                            type="audio/mpeg"
-                          />
-                        </audio>
-                        <v-btn
-                          v-else
-                          :href="`${API_BASE_URL}/storage/${question.question_media_url}`"
-                          target="_blank"
-                          variant="outlined"
-                          size="small"
-                        >
-                          {{ t("questions.viewFile") }}
-                        </v-btn>
-                      </div>
+                          <div
+                            v-if="hasQuestionMedia(question)"
+                            class="media-grid"
+                          >
+                            <button
+                              v-for="(media, index) in sortedMedia(
+                                question.question_media
+                              )"
+                              :key="`q-${question.id}-${media.id ?? index}`"
+                              type="button"
+                              class="media-tile"
+                              @click="openMediaPreview(media)"
+                            >
+                              <img
+                                v-if="isImage(media.media_type)"
+                                :src="mediaUrl(media.media_url)"
+                                :alt="`question-media-${media.order || index + 1}`"
+                                class="media-tile__image"
+                                loading="lazy"
+                              />
+                              <video
+                                v-else-if="isVideo(media.media_type)"
+                                :src="mediaUrl(media.media_url)"
+                                class="media-tile__image"
+                                muted
+                              />
+                              <div v-else class="media-tile__fallback">
+                                <v-icon size="28" color="grey">
+                                  {{
+                                    isAudio(media.media_type)
+                                      ? "mdi-music"
+                                      : "mdi-file"
+                                  }}
+                                </v-icon>
+                              </div>
+                              <div class="media-tile__overlay">
+                                <v-icon color="white" size="22">
+                                  mdi-magnify-plus-outline
+                                </v-icon>
+                              </div>
+                              <span class="media-tile__badge">
+                                {{ media.order || index + 1 }}
+                              </span>
+                            </button>
+                          </div>
 
-                      <div
-                        v-if="question.answer_media_url"
-                        class="media-preview"
-                      >
-                        <h4 class="text-subtitle-2 font-weight-bold mb-2">
-                          {{ t("questions.answerMedia") }}
-                        </h4>
-                        <v-img
-                          v-if="isImage(question.answer_media_type)"
-                          :src="`${API_BASE_URL}/storage/${question.answer_media_url}`"
-                          width="150"
-                          height="100"
-                          cover
-                          class="rounded"
-                        />
-                        <video
-                          v-else-if="isVideo(question.answer_media_type)"
-                          :src="`${API_BASE_URL}/storage/${question.answer_media_url}`"
-                          width="150"
-                          height="100"
-                          controls
-                          class="rounded"
-                        />
-                        <audio
-                          v-else-if="isAudio(question?.answer_media_type)"
-                          controls
-                        >
-                          <source
-                            :src="`${API_BASE_URL}/storage/${question.answer_media_url}`"
-                            type="audio/mpeg"
-                          />
-                        </audio>
-                        <v-btn
-                          v-else
-                          :href="`${API_BASE_URL}/storage/${question.answer_media_url}`"
-                          target="_blank"
-                          variant="outlined"
-                          size="small"
-                        >
-                          {{ t("questions.viewFile") }}
-                        </v-btn>
-                      </div>
-                    </div>
+                          <div v-else class="media-empty">
+                            <v-icon size="28" color="grey-lighten-1">
+                              mdi-file-cancel-outline
+                            </v-icon>
+                            <span>{{ t("questions.noMedia") }}</span>
+                          </div>
+                        </div>
+                      </v-col>
+
+                      <v-col cols="12" md="6">
+                        <div class="media-panel">
+                          <div class="media-panel__header">
+                            <div class="d-flex align-center ga-2">
+                              <v-avatar
+                                color="success"
+                                variant="tonal"
+                                size="32"
+                              >
+                                <v-icon size="18">mdi-check-circle-outline</v-icon>
+                              </v-avatar>
+                              <div>
+                                <p class="media-panel__title mb-0">
+                                  {{ t("questions.answerMedia") }}
+                                </p>
+                                <p class="media-panel__subtitle mb-0">
+                                  {{
+                                    t("questions.mediaCount", {
+                                      count: sortedMedia(question.answer_media)
+                                        .length,
+                                    })
+                                  }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            v-if="hasAnswerMedia(question)"
+                            class="media-grid"
+                          >
+                            <button
+                              v-for="(media, index) in sortedMedia(
+                                question.answer_media
+                              )"
+                              :key="`a-${question.id}-${media.id ?? index}`"
+                              type="button"
+                              class="media-tile"
+                              @click="openMediaPreview(media)"
+                            >
+                              <img
+                                v-if="isImage(media.media_type)"
+                                :src="mediaUrl(media.media_url)"
+                                :alt="`answer-media-${media.order || index + 1}`"
+                                class="media-tile__image"
+                                loading="lazy"
+                              />
+                              <video
+                                v-else-if="isVideo(media.media_type)"
+                                :src="mediaUrl(media.media_url)"
+                                class="media-tile__image"
+                                muted
+                              />
+                              <div v-else class="media-tile__fallback">
+                                <v-icon size="28" color="grey">
+                                  {{
+                                    isAudio(media.media_type)
+                                      ? "mdi-music"
+                                      : "mdi-file"
+                                  }}
+                                </v-icon>
+                              </div>
+                              <div class="media-tile__overlay">
+                                <v-icon color="white" size="22">
+                                  mdi-magnify-plus-outline
+                                </v-icon>
+                              </div>
+                              <span class="media-tile__badge">
+                                {{ media.order || index + 1 }}
+                              </span>
+                            </button>
+                          </div>
+
+                          <div v-else class="media-empty">
+                            <v-icon size="28" color="grey-lighten-1">
+                              mdi-file-cancel-outline
+                            </v-icon>
+                            <span>{{ t("questions.noMedia") }}</span>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
                   </div>
                 </v-card-text>
               </v-card>
@@ -495,6 +654,18 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
             </v-card-title>
 
             <v-card-text class="pa-6">
+              <v-alert
+                v-if="formErrorMessage"
+                type="error"
+                variant="tonal"
+                class="mb-4"
+                border="start"
+                closable
+                @click:close="formErrorMessage = ''"
+              >
+                {{ formErrorMessage }}
+              </v-alert>
+
               <v-form @submit.prevent="handleSubmit" ref="questionForm">
                 <v-textarea
                   v-model="questionFormData.question_text"
@@ -533,21 +704,45 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                 </h3>
 
                 <v-file-input
-                  v-model="questionFormData.question_media"
+                  :model-value="questionFormData.question_media"
                   :label="t('questions.dialog.questionMedia')"
+                  :hint="t('questions.dialog.mediaMultipleHint')"
+                  :error-messages="
+                    formFieldErrors.question_media
+                      ? [formFieldErrors.question_media]
+                      : []
+                  "
+                  persistent-hint
                   variant="outlined"
-                  accept="image/*,video/*,audio/*,.pdf"
-                  prepend-icon="mdi-file-question"
+                  accept="image/*"
+                  prepend-icon="mdi-image-multiple"
+                  multiple
+                  chips
+                  counter
+                  show-size
                   class="mb-4"
+                  @update:model-value="onQuestionMediaChange"
                 />
 
                 <v-file-input
-                  v-model="questionFormData.answer_media"
+                  :model-value="questionFormData.answer_media"
                   :label="t('questions.dialog.answerMedia')"
+                  :hint="t('questions.dialog.mediaMultipleHint')"
+                  :error-messages="
+                    formFieldErrors.answer_media
+                      ? [formFieldErrors.answer_media]
+                      : []
+                  "
+                  persistent-hint
                   variant="outlined"
-                  accept="image/*,video/*,audio/*,.pdf"
-                  prepend-icon="mdi-file-check"
+                  accept="image/*"
+                  prepend-icon="mdi-image-multiple"
+                  multiple
+                  chips
+                  counter
+                  show-size
                   class="mb-6"
+                  @update:model-value="onAnswerMediaChange"
                 />
 
                 <div class="d-flex" style="gap: 16px">
@@ -581,6 +776,85 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
                 </div>
               </v-form>
             </v-card-text>
+          </v-card>
+        </v-dialog>
+
+        <!-- Media lightbox -->
+        <v-dialog
+          v-model="showMediaPreview"
+          max-width="920"
+          scrim="rgba(15, 15, 20, 0.72)"
+        >
+          <v-card v-if="previewMedia" class="media-lightbox" rounded="lg">
+            <div class="media-lightbox__toolbar">
+              <div>
+                <p class="text-subtitle-1 font-weight-bold mb-0 text-white">
+                  {{
+                    previewMedia.side === "answer"
+                      ? t("questions.answerMedia")
+                      : t("questions.questionMedia")
+                  }}
+                </p>
+                <p class="text-caption mb-0 media-lightbox__meta">
+                  #{{ previewMedia.order }} · {{ previewMedia.media_type }}
+                </p>
+              </div>
+              <div class="d-flex ga-1">
+                <v-btn
+                  icon
+                  variant="text"
+                  color="white"
+                  :href="mediaUrl(previewMedia.media_url)"
+                  target="_blank"
+                  :title="t('questions.viewFile')"
+                >
+                  <v-icon>mdi-open-in-new</v-icon>
+                </v-btn>
+                <v-btn
+                  icon
+                  variant="text"
+                  color="white"
+                  @click="closeMediaPreview"
+                >
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </div>
+            </div>
+
+            <div class="media-lightbox__body">
+              <img
+                v-if="isImage(previewMedia.media_type)"
+                :src="mediaUrl(previewMedia.media_url)"
+                :alt="previewMedia.media_url"
+                class="media-lightbox__image"
+              />
+              <video
+                v-else-if="isVideo(previewMedia.media_type)"
+                :src="mediaUrl(previewMedia.media_url)"
+                controls
+                class="media-lightbox__video"
+              />
+              <audio
+                v-else-if="isAudio(previewMedia.media_type)"
+                controls
+                class="ma-8"
+              >
+                <source
+                  :src="mediaUrl(previewMedia.media_url)"
+                  :type="previewMedia.media_type"
+                />
+              </audio>
+              <v-btn
+                v-else
+                :href="mediaUrl(previewMedia.media_url)"
+                target="_blank"
+                color="primary"
+                class="ma-8"
+                prepend-icon="mdi-download"
+              >
+                {{ t("questions.viewFile") }}
+              </v-btn>
+            </div>
           </v-card>
         </v-dialog>
 
@@ -662,8 +936,161 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   backdrop-filter: blur(10px);
 }
 
-.media-preview {
-  flex: 1;
+.media-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 16px;
+}
+
+.media-panel {
+  background: #f7f7f8;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 14px;
+  height: 100%;
+}
+
+.media-panel__header {
+  margin-bottom: 12px;
+}
+
+.media-panel__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.82);
+  line-height: 1.2;
+}
+
+.media-panel__subtitle {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.media-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #e9e9ec;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.media-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(214, 40, 40, 0.18);
+}
+
+.media-tile:hover .media-tile__overlay {
+  opacity: 1;
+}
+
+.media-tile__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-tile__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ececef;
+}
+
+.media-tile__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 53, 0.55),
+    rgba(214, 40, 40, 0.65)
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.media-tile__badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.media-empty {
+  min-height: 104px;
+  border: 1px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.media-lightbox {
+  overflow: hidden;
+  background: #111;
+}
+
+.media-lightbox__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #ff6b35 0%, #d62828 100%);
+}
+
+.media-lightbox__meta {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.media-lightbox__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  background: #0f0f12;
+}
+
+.media-lightbox__image,
+.media-lightbox__video {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.media-lightbox__video {
+  outline: none;
 }
 
 .custom-list-item {

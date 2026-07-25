@@ -1,26 +1,45 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
-import type { LoginCredentials, RegisterData } from "../types";
+import type { LoginCredentials } from "../types";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 
-const loginForm = ref<any>(null);
-const errorMessage = ref<string>("");
+const loginForm = ref<{ validate: () => Promise<{ valid: boolean }> } | null>(
+  null
+);
+const errorMessage = ref("");
 
-const form = reactive<LoginCredentials>({
-  email: "",
+const form = reactive({
+  identifier: "",
   password: "",
 });
 
-// قواعد التحقق
-const emailRules = [
-  (v: string) => !!v || t("login.errors.requiredEmail"),
-  (v: string) => /.+@.+\..+/.test(v) || t("login.errors.correctEmail"),
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const isPhone = (value: string) => {
+  const normalized = value.replace(/[\s-]/g, "");
+  return /^\+?\d{8,15}$/.test(normalized);
+};
+
+const identifierIcon = computed(() =>
+  isEmail(form.identifier.trim())
+    ? "mdi-email-outline"
+    : isPhone(form.identifier.trim())
+      ? "mdi-phone-outline"
+      : "mdi-account-outline"
+);
+
+const identifierRules = [
+  (v: string) => !!v?.trim() || t("login.errors.requiredIdentifier"),
+  (v: string) =>
+    isEmail(v.trim()) ||
+    isPhone(v.trim()) ||
+    t("login.errors.correctIdentifier"),
 ];
 
 const passwordRules = [
@@ -28,11 +47,27 @@ const passwordRules = [
   (v: string) => v.length >= 8 || t("login.errors.correctPassword"),
 ];
 
-const handleLogin = async (): Promise<void> => {
+const buildCredentials = (): LoginCredentials => {
+  const trimmed = form.identifier.trim();
+  const password = form.password;
+
+  if (isEmail(trimmed)) {
+    return { email: trimmed, password };
+  }
+
+  return {
+    phone_number: trimmed.replace(/[\s-]/g, ""),
+    password,
+  };
+};
+
+const handleLogin = async () => {
+  if (!loginForm.value) return;
   const { valid } = await loginForm.value.validate();
   if (!valid) return;
 
-  const result = await authStore.login(form);
+  errorMessage.value = "";
+  const result = await authStore.login(buildCredentials());
   if (result.success) {
     router.push("/categories");
   } else {
@@ -47,7 +82,6 @@ const handleLogin = async (): Promise<void> => {
       <v-col cols="12" sm="8" md="6" lg="4">
         <v-card class="custom-card login-card" elevation="12">
           <v-card-text class="text-center pa-8">
-            <!-- شعار/عنوان اللعبة -->
             <div class="game-logo mb-6">
               <v-icon size="64" color="primary" class="mb-2">
                 mdi-gamepad-variant
@@ -59,24 +93,24 @@ const handleLogin = async (): Promise<void> => {
                 {{ t("login.subtitle") }}
               </h2>
               <div class="lightning-icons mt-2">
-                <v-icon color="warning" class="lightning-icon mx-1"
-                  >mdi-lightning-bolt</v-icon
-                >
-                <v-icon color="error" class="lightning-icon mx-1"
-                  >mdi-lightning-bolt</v-icon
-                >
+                <v-icon color="warning" class="lightning-icon mx-1">
+                  mdi-lightning-bolt
+                </v-icon>
+                <v-icon color="error" class="lightning-icon mx-1">
+                  mdi-lightning-bolt
+                </v-icon>
               </div>
             </div>
 
-            <!-- نموذج تسجيل الدخول -->
-            <v-form @submit.prevent="handleLogin" ref="loginForm">
+            <v-form ref="loginForm" @submit.prevent="handleLogin">
               <v-text-field
-                v-model="form.email"
-                :label="t('login.email')"
-                type="email"
-                prepend-inner-icon="mdi-email"
+                v-model="form.identifier"
+                :label="t('login.emailOrPhone')"
+                :prepend-inner-icon="identifierIcon"
                 variant="outlined"
-                :rules="emailRules"
+                :rules="identifierRules"
+                autocomplete="username"
+                inputmode="text"
                 required
                 class="mb-4"
               />
@@ -88,6 +122,7 @@ const handleLogin = async (): Promise<void> => {
                 prepend-inner-icon="mdi-lock"
                 variant="outlined"
                 :rules="passwordRules"
+                autocomplete="current-password"
                 required
                 class="mb-6"
               />
@@ -106,12 +141,11 @@ const handleLogin = async (): Promise<void> => {
                   style="gap: 10px"
                 >
                   <v-icon>mdi-login</v-icon>
-                  <span>{{ t("login.title") }}</span>
+                  <span>{{ t("login.login") }}</span>
                 </div>
               </v-btn>
             </v-form>
 
-            <!-- رسالة الخطأ -->
             <v-alert
               v-if="errorMessage"
               type="error"
