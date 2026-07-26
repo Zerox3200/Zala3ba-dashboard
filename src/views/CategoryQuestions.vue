@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCategoriesStore } from "../stores/categories";
@@ -55,6 +55,11 @@ const onQuestionMediaChange = (files: File | File[] | null) => {
 
 const onAnswerMediaChange = (files: File | File[] | null) => {
   questionFormData.answer_media = normalizeFiles(files);
+};
+
+const sortedMedia = (items?: QuestionMediaItem[] | null) => {
+  if (!Array.isArray(items)) return [];
+  return [...items].sort((a, b) => (a.order || 0) - (b.order || 0));
 };
 
 const formErrorMessage = ref("");
@@ -140,13 +145,99 @@ const viewQuestion = (question: Question) => {
 };
 
 const editQuestion = (question: Question) => {
-  editingQuestion.value = question;
+  editingQuestion.value = {
+    ...question,
+    question_media: [...(question.question_media || [])],
+    answer_media: [...(question.answer_media || [])],
+  };
   questionFormData.question_text = question.question_text;
   questionFormData.answer_text = question.answer_text;
   questionFormData.difficulty = question.difficulty;
   resetMediaFields();
   clearFormErrors();
   showCreateDialog.value = true;
+};
+
+const canDeleteMedia = (media: QuestionMediaItem) => media.id != null;
+
+const editableMediaOnly = (items?: QuestionMediaItem[] | null) =>
+  sortedMedia(items).filter((media) => media.id != null);
+
+const hasLegacyMedia = computed(() => {
+  if (!editingQuestion.value) return false;
+  const questionItems = editingQuestion.value.question_media || [];
+  const answerItems = editingQuestion.value.answer_media || [];
+  return [...questionItems, ...answerItems].some((media) => media.id == null);
+});
+
+const editingQuestionMedia = computed(() =>
+  editableMediaOnly(editingQuestion.value?.question_media)
+);
+
+const editingAnswerMedia = computed(() =>
+  editableMediaOnly(editingQuestion.value?.answer_media)
+);
+
+const mediaToDelete = ref<QuestionMediaItem | null>(null);
+const showDeleteMediaDialog = ref(false);
+const deletingMediaId = ref<number | null>(null);
+
+const openDeleteMediaDialog = (media: QuestionMediaItem) => {
+  if (!canDeleteMedia(media)) return;
+  mediaToDelete.value = media;
+  showDeleteMediaDialog.value = true;
+};
+
+const closeDeleteMediaDialog = () => {
+  if (deletingMediaId.value != null) return;
+  showDeleteMediaDialog.value = false;
+  mediaToDelete.value = null;
+};
+
+const confirmDeleteMedia = async () => {
+  if (!editingQuestion.value || mediaToDelete.value?.id == null) return;
+
+  deletingMediaId.value = mediaToDelete.value.id;
+  const mediaId = mediaToDelete.value.id;
+  const side = mediaToDelete.value.side;
+
+  const result = await questionsStore.deleteQuestionMedia(
+    editingQuestion.value.id,
+    mediaId,
+    +route.params.id
+  );
+
+  if (result.success) {
+    if (side === "question") {
+      editingQuestion.value.question_media =
+        editingQuestion.value.question_media.filter(
+          (media) => media.id !== mediaId
+        );
+    } else {
+      editingQuestion.value.answer_media =
+        editingQuestion.value.answer_media.filter(
+          (media) => media.id !== mediaId
+        );
+    }
+
+    const refreshed = questionsStore.questions.find(
+      (question) => question.id === editingQuestion.value?.id
+    );
+    if (refreshed) {
+      editingQuestion.value = {
+        ...refreshed,
+        question_media: [...(refreshed.question_media || [])],
+        answer_media: [...(refreshed.answer_media || [])],
+      };
+    }
+
+    showDeleteMediaDialog.value = false;
+    mediaToDelete.value = null;
+  } else {
+    formErrorMessage.value = result.message || t("questions.errors.generic");
+  }
+
+  deletingMediaId.value = null;
 };
 
 const deleteQuestion = (question: Question) => {
@@ -254,11 +345,6 @@ const isVideo = (mimeType?: string | null) => {
 
 const isAudio = (mimeType?: string | null) => {
   return !!mimeType && mimeType.startsWith("audio/");
-};
-
-const sortedMedia = (items?: QuestionMediaItem[] | null) => {
-  if (!Array.isArray(items)) return [];
-  return [...items].sort((a, b) => (a.order || 0) - (b.order || 0));
 };
 
 const hasQuestionMedia = (question: Question) =>
@@ -641,10 +727,15 @@ onMounted(async () => {
       </div>
       <div>
         <!-- Create/Edit Dialog -->
-        <v-dialog v-model="showCreateDialog" max-width="800">
-          <v-card class="custom-card">
-            <v-card-title class="pa-6">
-              <h2 class="gradient-text text-h4">
+        <v-dialog
+          v-model="showCreateDialog"
+          max-width="840"
+          scrollable
+          :fullscreen="$vuetify.display.smAndDown"
+        >
+          <v-card class="custom-card question-form-dialog">
+            <v-card-title class="pa-5 pa-sm-6 question-form-dialog__header">
+              <h2 class="gradient-text text-h5 text-sm-h4 mb-0">
                 {{
                   editingQuestion
                     ? t("questions.editQuestion")
@@ -653,7 +744,9 @@ onMounted(async () => {
               </h2>
             </v-card-title>
 
-            <v-card-text class="pa-6">
+            <v-divider />
+
+            <v-card-text class="pa-5 pa-sm-6 question-form-dialog__body">
               <v-alert
                 v-if="formErrorMessage"
                 type="error"
@@ -697,85 +790,262 @@ onMounted(async () => {
                   class="mb-4"
                 />
 
-                <v-divider class="my-6"></v-divider>
+                <v-divider class="my-5" />
 
-                <h3 class="text-h6 font-weight-bold mb-4">
-                  {{ t("questions.mediaFiles") }}
-                </h3>
-
-                <v-file-input
-                  :model-value="questionFormData.question_media"
-                  :label="t('questions.dialog.questionMedia')"
-                  :hint="t('questions.dialog.mediaMultipleHint')"
-                  :error-messages="
-                    formFieldErrors.question_media
-                      ? [formFieldErrors.question_media]
-                      : []
-                  "
-                  persistent-hint
-                  variant="outlined"
-                  accept="image/*"
-                  prepend-icon="mdi-image-multiple"
-                  multiple
-                  chips
-                  counter
-                  show-size
-                  class="mb-4"
-                  @update:model-value="onQuestionMediaChange"
-                />
-
-                <v-file-input
-                  :model-value="questionFormData.answer_media"
-                  :label="t('questions.dialog.answerMedia')"
-                  :hint="t('questions.dialog.mediaMultipleHint')"
-                  :error-messages="
-                    formFieldErrors.answer_media
-                      ? [formFieldErrors.answer_media]
-                      : []
-                  "
-                  persistent-hint
-                  variant="outlined"
-                  accept="image/*"
-                  prepend-icon="mdi-image-multiple"
-                  multiple
-                  chips
-                  counter
-                  show-size
-                  class="mb-6"
-                  @update:model-value="onAnswerMediaChange"
-                />
-
-                <div class="d-flex" style="gap: 16px">
-                  <v-btn
-                    type="submit"
-                    color="primary"
-                    :loading="questionsStore.loading"
-                    :disabled="questionsStore.loading"
-                    size="50"
-                    style="width: calc(50% - 8px)"
+                <template v-if="editingQuestion">
+                  <v-alert
+                    v-if="hasLegacyMedia"
+                    type="warning"
+                    variant="tonal"
+                    border="start"
+                    class="mb-4"
+                    density="comfortable"
                   >
-                    <v-icon left>
-                      {{ editingQuestion ? "mdi-content-save" : "mdi-plus" }}
-                    </v-icon>
-                    {{
-                      editingQuestion
-                        ? t("questions.dialog.updateButton")
-                        : t("questions.dialog.createButton")
-                    }}
-                  </v-btn>
+                    <div class="font-weight-bold mb-1">
+                      {{ t("questions.dialog.legacyMediaTitle") }}
+                    </div>
+                    <div class="text-body-2">
+                      {{ t("questions.dialog.legacyMediaHint") }}
+                    </div>
+                  </v-alert>
 
-                  <v-btn
-                    color="grey"
+                  <div class="edit-media-block mb-5">
+                    <div class="d-flex align-center justify-space-between mb-3">
+                      <h3 class="text-subtitle-1 font-weight-bold mb-0">
+                        {{ t("questions.dialog.currentQuestionMedia") }}
+                      </h3>
+                      <v-chip size="small" variant="tonal" color="primary">
+                        {{
+                          t("questions.mediaCount", {
+                            count: editingQuestionMedia.length,
+                          })
+                        }}
+                      </v-chip>
+                    </div>
+
+                    <div
+                      v-if="editingQuestionMedia.length"
+                      class="edit-media-grid"
+                    >
+                      <div
+                        v-for="(media, index) in editingQuestionMedia"
+                        :key="`edit-q-${media.id ?? index}`"
+                        class="edit-media-card"
+                      >
+                        <img
+                          v-if="isImage(media.media_type)"
+                          :src="mediaUrl(media.media_url)"
+                          :alt="`question-media-${media.order || index + 1}`"
+                          class="edit-media-card__image"
+                          loading="lazy"
+                        />
+                        <div v-else class="edit-media-card__fallback">
+                          <v-icon size="28">mdi-file</v-icon>
+                        </div>
+
+                        <span class="edit-media-card__order">
+                          {{ media.order || index + 1 }}
+                        </span>
+
+                        <v-btn
+                          class="edit-media-card__delete"
+                          icon
+                          size="small"
+                          color="error"
+                          variant="flat"
+                          :loading="deletingMediaId === media.id"
+                          :title="t('questions.dialog.deleteMediaTitle')"
+                          @click.stop="openDeleteMediaDialog(media)"
+                        >
+                          <v-icon size="18">mdi-delete</v-icon>
+                        </v-btn>
+                      </div>
+                    </div>
+
+                    <div v-else class="edit-media-empty">
+                      {{ t("questions.noMedia") }}
+                    </div>
+                  </div>
+
+                  <div class="edit-media-block mb-5">
+                    <div class="d-flex align-center justify-space-between mb-3">
+                      <h3 class="text-subtitle-1 font-weight-bold mb-0">
+                        {{ t("questions.dialog.currentAnswerMedia") }}
+                      </h3>
+                      <v-chip size="small" variant="tonal" color="success">
+                        {{
+                          t("questions.mediaCount", {
+                            count: editingAnswerMedia.length,
+                          })
+                        }}
+                      </v-chip>
+                    </div>
+
+                    <div
+                      v-if="editingAnswerMedia.length"
+                      class="edit-media-grid"
+                    >
+                      <div
+                        v-for="(media, index) in editingAnswerMedia"
+                        :key="`edit-a-${media.id ?? index}`"
+                        class="edit-media-card"
+                      >
+                        <img
+                          v-if="isImage(media.media_type)"
+                          :src="mediaUrl(media.media_url)"
+                          :alt="`answer-media-${media.order || index + 1}`"
+                          class="edit-media-card__image"
+                          loading="lazy"
+                        />
+                        <div v-else class="edit-media-card__fallback">
+                          <v-icon size="28">mdi-file</v-icon>
+                        </div>
+
+                        <span class="edit-media-card__order">
+                          {{ media.order || index + 1 }}
+                        </span>
+
+                        <v-btn
+                          class="edit-media-card__delete"
+                          icon
+                          size="small"
+                          color="error"
+                          variant="flat"
+                          :loading="deletingMediaId === media.id"
+                          :title="t('questions.dialog.deleteMediaTitle')"
+                          @click.stop="openDeleteMediaDialog(media)"
+                        >
+                          <v-icon size="18">mdi-delete</v-icon>
+                        </v-btn>
+                      </div>
+                    </div>
+
+                    <div v-else class="edit-media-empty">
+                      {{ t("questions.noMedia") }}
+                    </div>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">
+                    {{ t("questions.mediaFiles") }}
+                  </h3>
+
+                  <v-file-input
+                    :model-value="questionFormData.question_media"
+                    :label="t('questions.dialog.questionMedia')"
+                    :hint="t('questions.dialog.mediaMultipleHint')"
+                    :error-messages="
+                      formFieldErrors.question_media
+                        ? [formFieldErrors.question_media]
+                        : []
+                    "
+                    persistent-hint
                     variant="outlined"
-                    @click="closeDialog"
-                    size="50"
-                    style="width: calc(50% - 8px)"
-                  >
-                    {{ t("questions.dialog.cancel") }}
-                  </v-btn>
-                </div>
+                    accept="image/*"
+                    prepend-icon="mdi-image-multiple"
+                    multiple
+                    chips
+                    counter
+                    show-size
+                    class="mb-4"
+                    @update:model-value="onQuestionMediaChange"
+                  />
+
+                  <v-file-input
+                    :model-value="questionFormData.answer_media"
+                    :label="t('questions.dialog.answerMedia')"
+                    :hint="t('questions.dialog.mediaMultipleHint')"
+                    :error-messages="
+                      formFieldErrors.answer_media
+                        ? [formFieldErrors.answer_media]
+                        : []
+                    "
+                    persistent-hint
+                    variant="outlined"
+                    accept="image/*"
+                    prepend-icon="mdi-image-multiple"
+                    multiple
+                    chips
+                    counter
+                    show-size
+                    class="mb-2"
+                    @update:model-value="onAnswerMediaChange"
+                  />
+                </template>
               </v-form>
             </v-card-text>
+
+            <v-divider />
+
+            <v-card-actions class="pa-4 pa-sm-5 question-form-dialog__actions">
+              <v-spacer />
+              <v-btn
+                color="grey"
+                variant="outlined"
+                :disabled="questionsStore.loading || deletingMediaId != null"
+                @click="closeDialog"
+              >
+                {{ t("questions.dialog.cancel") }}
+              </v-btn>
+              <v-btn
+                color="primary"
+                class="custom-btn"
+                :loading="questionsStore.loading"
+                :disabled="deletingMediaId != null"
+                prepend-icon="mdi-check"
+                @click="handleSubmit"
+              >
+                {{
+                  editingQuestion
+                    ? t("questions.dialog.updateButton")
+                    : t("questions.dialog.createButton")
+                }}
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- Delete media confirmation -->
+        <v-dialog
+          v-model="showDeleteMediaDialog"
+          max-width="460"
+          persistent
+        >
+          <v-card class="custom-card" rounded="lg">
+            <v-card-title class="pa-5 d-flex align-center text-error">
+              <v-avatar color="error" variant="tonal" size="40" class="me-3">
+                <v-icon>mdi-delete-alert</v-icon>
+              </v-avatar>
+              <span class="text-h6 font-weight-bold">
+                {{ t("questions.dialog.deleteMediaTitle") }}
+              </span>
+            </v-card-title>
+            <v-card-text class="pa-5 pt-0">
+              <p class="text-body-1 mb-0">
+                {{ t("questions.dialog.deleteMediaConfirm") }}
+              </p>
+            </v-card-text>
+            <v-card-actions class="pa-5 pt-0 flex-wrap ga-2">
+              <v-spacer />
+              <v-btn
+                variant="outlined"
+                color="grey-darken-1"
+                :disabled="deletingMediaId != null"
+                @click="closeDeleteMediaDialog"
+              >
+                {{ t("questions.dialog.cancel") }}
+              </v-btn>
+              <v-btn
+                color="error"
+                variant="flat"
+                prepend-icon="mdi-delete"
+                :loading="deletingMediaId != null"
+                @click="confirmDeleteMedia"
+              >
+                {{ t("questions.dialog.deleteMediaButton") }}
+              </v-btn>
+            </v-card-actions>
           </v-card>
         </v-dialog>
 
@@ -859,38 +1129,44 @@ onMounted(async () => {
         </v-dialog>
 
         <!-- Delete Confirmation Dialog -->
-        <v-dialog v-model="showDeleteDialog" max-width="400">
-          <v-card class="custom-card">
-            <v-card-title class="pa-6">
-              <h3 class="text-h5 font-weight-bold">
+        <v-dialog v-model="showDeleteDialog" max-width="460" persistent>
+          <v-card class="custom-card delete-question-dialog" rounded="lg">
+            <v-card-title class="pa-5 d-flex align-center text-error">
+              <v-avatar color="error" variant="tonal" size="40" class="me-3">
+                <v-icon>mdi-alert-circle</v-icon>
+              </v-avatar>
+              <span class="text-h6 font-weight-bold">
                 {{ t("questions.dialog.deleteTitle") }}
-              </h3>
+              </span>
             </v-card-title>
 
-            <v-card-text class="pa-6">
-              <p>{{ t("questions.dialog.deleteConfirm") }}</p>
-              <p class="text-caption text-grey-darken-1 mt-2">
-                {{ t("questions.dialog.deleteWarning") }}
+            <v-card-text class="pa-5 pt-0">
+              <p class="text-body-1 mb-3">
+                {{ t("questions.dialog.deleteConfirm") }}
               </p>
+              <v-alert type="error" variant="tonal" density="comfortable" border="start">
+                {{ t("questions.dialog.deleteWarning") }}
+              </v-alert>
             </v-card-text>
 
-            <v-card-actions class="pa-6 pt-0">
+            <v-card-actions class="pa-5 pt-0 flex-wrap ga-2">
+              <v-spacer />
               <v-btn
-                color="error"
                 variant="outlined"
-                @click="confirmDelete"
-                :loading="questionsStore.loading"
-                block
-              >
-                {{ t("questions.dialog.deleteButton") }}
-              </v-btn>
-              <v-btn
-                color="grey"
-                variant="text"
+                color="grey-darken-1"
+                :disabled="questionsStore.loading"
                 @click="closeDeleteDialog"
-                block
               >
                 {{ t("questions.dialog.cancel") }}
+              </v-btn>
+              <v-btn
+                color="error"
+                variant="flat"
+                prepend-icon="mdi-delete"
+                :loading="questionsStore.loading"
+                @click="confirmDelete"
+              >
+                {{ t("questions.dialog.deleteButton") }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -1091,6 +1367,111 @@ onMounted(async () => {
 
 .media-lightbox__video {
   outline: none;
+}
+
+.question-form-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.question-form-dialog__header {
+  flex-shrink: 0;
+}
+
+.question-form-dialog__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  max-height: min(70vh, 720px);
+}
+
+.question-form-dialog__actions {
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.edit-media-block {
+  background: #f7f7f8;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.edit-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 10px;
+}
+
+.edit-media-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e9e9ec;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.edit-media-card--legacy {
+  opacity: 0.92;
+}
+
+.edit-media-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.edit-media-card__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.edit-media-card__order {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-media-card__legacy {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+}
+
+.edit-media-card__delete {
+  position: absolute !important;
+  top: 6px;
+  right: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-media-empty {
+  min-height: 72px;
+  border: 1px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .custom-list-item {

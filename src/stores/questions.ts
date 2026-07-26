@@ -154,6 +154,28 @@ export const useQuestionsStore = defineStore("questions", () => {
     }
   };
 
+  const deleteQuestionMedia = async (
+    questionId: number,
+    mediaId: number,
+    categoryId: number
+  ): Promise<ApiResult> => {
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/api/questions/${questionId}/media/${mediaId}`
+      );
+
+      await fetchQuestions({ category_id: categoryId });
+      return { success: true };
+    } catch (error: any) {
+      console.error("خطأ في حذف وسائط السؤال:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "فشل في حذف الوسائط",
+        data: error.response?.data,
+      };
+    }
+  };
+
   const getQuestion = async (id: number): Promise<ApiResult<Question>> => {
     loading.value = true;
     try {
@@ -180,6 +202,7 @@ export const useQuestionsStore = defineStore("questions", () => {
     createQuestion,
     updateQuestion,
     deleteQuestion,
+    deleteQuestionMedia,
     getQuestion,
   };
 });
