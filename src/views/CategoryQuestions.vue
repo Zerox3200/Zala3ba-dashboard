@@ -178,17 +178,6 @@ const editingAnswerMedia = computed(() =>
   editableMediaOnly(editingQuestion.value?.answer_media)
 );
 
-const canAddMediaOnEdit = computed(() => {
-  if (!editingQuestion.value) return false;
-  const questionItems = editingQuestion.value.question_media || [];
-  const answerItems = editingQuestion.value.answer_media || [];
-  return questionItems.length === 0 && answerItems.length === 0;
-});
-
-const showMediaFileInputs = computed(
-  () => !editingQuestion.value || canAddMediaOnEdit.value
-);
-
 const mediaToDelete = ref<QuestionMediaItem | null>(null);
 const showDeleteMediaDialog = ref(false);
 const deletingMediaId = ref<number | null>(null);
@@ -820,12 +809,11 @@ onMounted(async () => {
                     </div>
                   </v-alert>
 
-                  <template v-if="!canAddMediaOnEdit">
-                    <div class="edit-media-block mb-5">
-                      <div class="d-flex align-center justify-space-between mb-3">
-                        <h3 class="text-subtitle-1 font-weight-bold mb-0">
-                          {{ t("questions.dialog.currentQuestionMedia") }}
-                        </h3>
+                  <div class="edit-media-block mb-5">
+                    <div class="d-flex align-center justify-space-between mb-3">
+                      <h3 class="text-subtitle-1 font-weight-bold mb-0">
+                        {{ t("questions.dialog.currentQuestionMedia") }}
+                      </h3>
                         <v-chip size="small" variant="tonal" color="primary">
                           {{
                             t("questions.mediaCount", {
@@ -936,60 +924,57 @@ onMounted(async () => {
                         {{ t("questions.noMedia") }}
                       </div>
                     </div>
-                  </template>
                 </template>
 
-                <template v-if="showMediaFileInputs">
-                  <h3 class="text-subtitle-1 font-weight-bold mb-3">
-                    {{
-                      editingQuestion
-                        ? t("questions.dialog.addMoreMedia")
-                        : t("questions.mediaFiles")
-                    }}
-                  </h3>
+                <h3 class="text-subtitle-1 font-weight-bold mb-3">
+                  {{
+                    editingQuestion
+                      ? t("questions.dialog.addMoreMedia")
+                      : t("questions.mediaFiles")
+                  }}
+                </h3>
 
-                  <v-file-input
-                    :model-value="questionFormData.question_media"
-                    :label="t('questions.dialog.questionMedia')"
-                    :hint="t('questions.dialog.mediaMultipleHint')"
-                    :error-messages="
-                      formFieldErrors.question_media
-                        ? [formFieldErrors.question_media]
-                        : []
-                    "
-                    persistent-hint
-                    variant="outlined"
-                    accept="image/*"
-                    prepend-icon="mdi-image-multiple"
-                    multiple
-                    chips
-                    counter
-                    show-size
-                    class="mb-4"
-                    @update:model-value="onQuestionMediaChange"
-                  />
+                <v-file-input
+                  :model-value="questionFormData.question_media"
+                  :label="t('questions.dialog.questionMedia')"
+                  :hint="t('questions.dialog.mediaMultipleHint')"
+                  :error-messages="
+                    formFieldErrors.question_media
+                      ? [formFieldErrors.question_media]
+                      : []
+                  "
+                  persistent-hint
+                  variant="outlined"
+                  accept="image/*"
+                  prepend-icon="mdi-image-multiple"
+                  multiple
+                  chips
+                  counter
+                  show-size
+                  class="mb-4"
+                  @update:model-value="onQuestionMediaChange"
+                />
 
-                  <v-file-input
-                    :model-value="questionFormData.answer_media"
-                    :label="t('questions.dialog.answerMedia')"
-                    :hint="t('questions.dialog.mediaMultipleHint')"
-                    :error-messages="
-                      formFieldErrors.answer_media
-                        ? [formFieldErrors.answer_media]
-                        : []
-                    "
-                    persistent-hint
-                    variant="outlined"
-                    accept="image/*"
-                    prepend-icon="mdi-image-multiple"
-                    multiple
-                    chips
-                    counter
-                    show-size
-                    class="mb-2"
-                    @update:model-value="onAnswerMediaChange"
-                  />
-                </template>
+                <v-file-input
+                  :model-value="questionFormData.answer_media"
+                  :label="t('questions.dialog.answerMedia')"
+                  :hint="t('questions.dialog.mediaMultipleHint')"
+                  :error-messages="
+                    formFieldErrors.answer_media
+                      ? [formFieldErrors.answer_media]
+                      : []
+                  "
+                  persistent-hint
+                  variant="outlined"
+                  accept="image/*"
+                  prepend-icon="mdi-image-multiple"
+                  multiple
+                  chips
+                  counter
+                  show-size
+                  class="mb-2"
+                  @update:model-value="onAnswerMediaChange"
+                />
               </v-form>
             </v-card-text>
 
