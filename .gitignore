@@ -5,7 +5,7 @@ dist/
 node_modules/
 
 # Ignore all files in the .env file
-.env
 
 # Ignore all files in the package-lock.json file
 package-lock.json
+config.bat
