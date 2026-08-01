@@ -178,6 +178,17 @@ const editingAnswerMedia = computed(() =>
   editableMediaOnly(editingQuestion.value?.answer_media)
 );
 
+const canAddMediaOnEdit = computed(() => {
+  if (!editingQuestion.value) return false;
+  const questionItems = editingQuestion.value.question_media || [];
+  const answerItems = editingQuestion.value.answer_media || [];
+  return questionItems.length === 0 && answerItems.length === 0;
+});
+
+const showMediaFileInputs = computed(
+  () => !editingQuestion.value || canAddMediaOnEdit.value
+);
+
 const mediaToDelete = ref<QuestionMediaItem | null>(null);
 const showDeleteMediaDialog = ref(false);
 const deletingMediaId = ref<number | null>(null);
@@ -809,126 +820,132 @@ onMounted(async () => {
                     </div>
                   </v-alert>
 
-                  <div class="edit-media-block mb-5">
-                    <div class="d-flex align-center justify-space-between mb-3">
-                      <h3 class="text-subtitle-1 font-weight-bold mb-0">
-                        {{ t("questions.dialog.currentQuestionMedia") }}
-                      </h3>
-                      <v-chip size="small" variant="tonal" color="primary">
-                        {{
-                          t("questions.mediaCount", {
-                            count: editingQuestionMedia.length,
-                          })
-                        }}
-                      </v-chip>
-                    </div>
+                  <template v-if="!canAddMediaOnEdit">
+                    <div class="edit-media-block mb-5">
+                      <div class="d-flex align-center justify-space-between mb-3">
+                        <h3 class="text-subtitle-1 font-weight-bold mb-0">
+                          {{ t("questions.dialog.currentQuestionMedia") }}
+                        </h3>
+                        <v-chip size="small" variant="tonal" color="primary">
+                          {{
+                            t("questions.mediaCount", {
+                              count: editingQuestionMedia.length,
+                            })
+                          }}
+                        </v-chip>
+                      </div>
 
-                    <div
-                      v-if="editingQuestionMedia.length"
-                      class="edit-media-grid"
-                    >
                       <div
-                        v-for="(media, index) in editingQuestionMedia"
-                        :key="`edit-q-${media.id ?? index}`"
-                        class="edit-media-card"
+                        v-if="editingQuestionMedia.length"
+                        class="edit-media-grid"
                       >
-                        <img
-                          v-if="isImage(media.media_type)"
-                          :src="mediaUrl(media.media_url)"
-                          :alt="`question-media-${media.order || index + 1}`"
-                          class="edit-media-card__image"
-                          loading="lazy"
-                        />
-                        <div v-else class="edit-media-card__fallback">
-                          <v-icon size="28">mdi-file</v-icon>
-                        </div>
-
-                        <span class="edit-media-card__order">
-                          {{ media.order || index + 1 }}
-                        </span>
-
-                        <v-btn
-                          class="edit-media-card__delete"
-                          icon
-                          size="small"
-                          color="error"
-                          variant="flat"
-                          :loading="deletingMediaId === media.id"
-                          :title="t('questions.dialog.deleteMediaTitle')"
-                          @click.stop="openDeleteMediaDialog(media)"
+                        <div
+                          v-for="(media, index) in editingQuestionMedia"
+                          :key="`edit-q-${media.id ?? index}`"
+                          class="edit-media-card"
                         >
-                          <v-icon size="18">mdi-delete</v-icon>
-                        </v-btn>
+                          <img
+                            v-if="isImage(media.media_type)"
+                            :src="mediaUrl(media.media_url)"
+                            :alt="`question-media-${media.order || index + 1}`"
+                            class="edit-media-card__image"
+                            loading="lazy"
+                          />
+                          <div v-else class="edit-media-card__fallback">
+                            <v-icon size="28">mdi-file</v-icon>
+                          </div>
+
+                          <span class="edit-media-card__order">
+                            {{ media.order || index + 1 }}
+                          </span>
+
+                          <v-btn
+                            class="edit-media-card__delete"
+                            icon
+                            size="small"
+                            color="error"
+                            variant="flat"
+                            :loading="deletingMediaId === media.id"
+                            :title="t('questions.dialog.deleteMediaTitle')"
+                            @click.stop="openDeleteMediaDialog(media)"
+                          >
+                            <v-icon size="18">mdi-delete</v-icon>
+                          </v-btn>
+                        </div>
+                      </div>
+
+                      <div v-else class="edit-media-empty">
+                        {{ t("questions.noMedia") }}
                       </div>
                     </div>
 
-                    <div v-else class="edit-media-empty">
-                      {{ t("questions.noMedia") }}
-                    </div>
-                  </div>
+                    <div class="edit-media-block mb-5">
+                      <div class="d-flex align-center justify-space-between mb-3">
+                        <h3 class="text-subtitle-1 font-weight-bold mb-0">
+                          {{ t("questions.dialog.currentAnswerMedia") }}
+                        </h3>
+                        <v-chip size="small" variant="tonal" color="success">
+                          {{
+                            t("questions.mediaCount", {
+                              count: editingAnswerMedia.length,
+                            })
+                          }}
+                        </v-chip>
+                      </div>
 
-                  <div class="edit-media-block mb-5">
-                    <div class="d-flex align-center justify-space-between mb-3">
-                      <h3 class="text-subtitle-1 font-weight-bold mb-0">
-                        {{ t("questions.dialog.currentAnswerMedia") }}
-                      </h3>
-                      <v-chip size="small" variant="tonal" color="success">
-                        {{
-                          t("questions.mediaCount", {
-                            count: editingAnswerMedia.length,
-                          })
-                        }}
-                      </v-chip>
-                    </div>
-
-                    <div
-                      v-if="editingAnswerMedia.length"
-                      class="edit-media-grid"
-                    >
                       <div
-                        v-for="(media, index) in editingAnswerMedia"
-                        :key="`edit-a-${media.id ?? index}`"
-                        class="edit-media-card"
+                        v-if="editingAnswerMedia.length"
+                        class="edit-media-grid"
                       >
-                        <img
-                          v-if="isImage(media.media_type)"
-                          :src="mediaUrl(media.media_url)"
-                          :alt="`answer-media-${media.order || index + 1}`"
-                          class="edit-media-card__image"
-                          loading="lazy"
-                        />
-                        <div v-else class="edit-media-card__fallback">
-                          <v-icon size="28">mdi-file</v-icon>
-                        </div>
-
-                        <span class="edit-media-card__order">
-                          {{ media.order || index + 1 }}
-                        </span>
-
-                        <v-btn
-                          class="edit-media-card__delete"
-                          icon
-                          size="small"
-                          color="error"
-                          variant="flat"
-                          :loading="deletingMediaId === media.id"
-                          :title="t('questions.dialog.deleteMediaTitle')"
-                          @click.stop="openDeleteMediaDialog(media)"
+                        <div
+                          v-for="(media, index) in editingAnswerMedia"
+                          :key="`edit-a-${media.id ?? index}`"
+                          class="edit-media-card"
                         >
-                          <v-icon size="18">mdi-delete</v-icon>
-                        </v-btn>
+                          <img
+                            v-if="isImage(media.media_type)"
+                            :src="mediaUrl(media.media_url)"
+                            :alt="`answer-media-${media.order || index + 1}`"
+                            class="edit-media-card__image"
+                            loading="lazy"
+                          />
+                          <div v-else class="edit-media-card__fallback">
+                            <v-icon size="28">mdi-file</v-icon>
+                          </div>
+
+                          <span class="edit-media-card__order">
+                            {{ media.order || index + 1 }}
+                          </span>
+
+                          <v-btn
+                            class="edit-media-card__delete"
+                            icon
+                            size="small"
+                            color="error"
+                            variant="flat"
+                            :loading="deletingMediaId === media.id"
+                            :title="t('questions.dialog.deleteMediaTitle')"
+                            @click.stop="openDeleteMediaDialog(media)"
+                          >
+                            <v-icon size="18">mdi-delete</v-icon>
+                          </v-btn>
+                        </div>
+                      </div>
+
+                      <div v-else class="edit-media-empty">
+                        {{ t("questions.noMedia") }}
                       </div>
                     </div>
-
-                    <div v-else class="edit-media-empty">
-                      {{ t("questions.noMedia") }}
-                    </div>
-                  </div>
+                  </template>
                 </template>
 
-                <template v-else>
+                <template v-if="showMediaFileInputs">
                   <h3 class="text-subtitle-1 font-weight-bold mb-3">
-                    {{ t("questions.mediaFiles") }}
+                    {{
+                      editingQuestion
+                        ? t("questions.dialog.addMoreMedia")
+                        : t("questions.mediaFiles")
+                    }}
                   </h3>
 
                   <v-file-input
